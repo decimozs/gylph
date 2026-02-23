@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
+  BadgeAlert,
   BadgeCheck,
   CircleCheck,
   PenTool,
@@ -136,11 +137,27 @@ function RouteComponent() {
                     key={item.id}
                     className={`rounded-md overflow-hidden bg-white group relative ${activeId === item.id ? "border-2 border-primary" : ""}`}
                   >
+                    <div className="absolute top-1 py-2 px-4">
+                      {item.isAuthentic ? (
+                        <div className="p-1 rounded-full bg-blue-500">
+                          <BadgeCheck className="text-white" />
+                        </div>
+                      ) : (
+                        <div className="p-1 rounded-full bg-red-500">
+                          <BadgeAlert className="text-white" />
+                        </div>
+                      )}
+                    </div>
                     <img
-                      src={item.queryImageUrl}
+                      src={item.previewImageUrl}
                       alt={`${item.id}-verification`}
-                      className={`rounded-md w-full h-30 object-contain grayscale opacity-40 blur-[0.5px] transition-all duration-300 ease-in-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:blur-none group-hover:scale-110 cursor-pointer ${activeId === item.id ? "grayscale-0 opacity-100 scale-110 blur-none ring-2 ring-primary" : ""} `}
+                      className={`rounded-md p-4 w-full h-30 object-contain grayscale opacity-40 blur-[0.5px] transition-all duration-300 ease-in-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:blur-none group-hover:scale-110 cursor-pointer ${activeId === item.id ? "grayscale-0 opacity-100 scale-110 blur-none ring-2 ring-primary" : ""} `}
                     />
+                    <div className="absolute bottom-0 py-2 px-4">
+                      <p className="font-medium text-primary">
+                        {Math.round(item.similarityScore * 100)}%
+                      </p>
+                    </div>
                   </Link>
                 ))
               ) : (
@@ -164,7 +181,8 @@ function RouteComponent() {
           <div className="flex flex-row items-center justify-between text-primary font-medium text-sm">
             <p>Index</p>
             <p>
-              {data.length} {data.length > 1 ? "Verifications" : "Verification"}
+              {filteredData.length}{" "}
+              {filteredData.length > 1 ? "Verifications" : "Verification"}
             </p>
           </div>
         </div>

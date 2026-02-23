@@ -6,7 +6,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { ShieldCheck } from "lucide-react";
+import { SquareDashed } from "lucide-react";
 
 export const Route = createFileRoute("/_dashboard/verifications/")({
   component: RouteComponent,
@@ -18,7 +18,7 @@ function RouteComponent() {
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <ShieldCheck />
+            <SquareDashed />
           </EmptyMedia>
           <EmptyTitle>No Verification Selected</EmptyTitle>
           <EmptyDescription className="">

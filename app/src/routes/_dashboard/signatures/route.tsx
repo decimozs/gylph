@@ -133,9 +133,9 @@ function RouteComponent() {
                     className={`rounded-md overflow-hidden bg-white group relative ${activeId === item.id ? "border-2 border-primary" : ""}`}
                   >
                     <img
-                      src={item.imageUrl}
+                      src={item.previewImageUrl}
                       alt={`${item.name}-signature`}
-                      className={`rounded-md w-full h-30 object-contain grayscale opacity-40 blur-[0.5px] transition-all duration-300 ease-in-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:blur-none group-hover:scale-110 cursor-pointer ${activeId === item.id ? "grayscale-0 opacity-100 scale-110 blur-none ring-2 ring-primary" : ""} `}
+                      className={`rounded-md p-4 w-full h-30 object-contain grayscale opacity-40 blur-[0.5px] transition-all duration-300 ease-in-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:blur-none group-hover:scale-110 cursor-pointer ${activeId === item.id ? "grayscale-0 opacity-100 scale-110 blur-none ring-2 ring-primary" : ""} `}
                     />
                     <div className="absolute bottom-0 py-2 px-4">
                       <p className="font-medium text-primary">{item.name}</p>
@@ -163,7 +163,8 @@ function RouteComponent() {
           <div className="flex flex-row items-center justify-between text-primary font-medium text-sm">
             <p>Index</p>
             <p>
-              {data.length} {data.length > 1 ? "Signatures" : "Signature"}
+              {filteredData.length}{" "}
+              {filteredData.length > 1 ? "Signatures" : "Signature"}
             </p>
           </div>
         </div>

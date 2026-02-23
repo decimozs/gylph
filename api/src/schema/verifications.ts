@@ -8,9 +8,12 @@ export const verifications = pgTable("verifications", {
   signatureId: text("signature_id").references(() => signatures.id, {
     onDelete: "set null",
   }),
-  queryImageUrl: text("query_image_url").notNull(),
+  queryImageUrl: text("query_image_url"),
   isAuthentic: boolean("is_authentic").notNull(),
   similarityScore: doublePrecision("similarity_score").notNull(),
+  previewImageUrl: text("preview_image_url"),
+  previewLiveNormalizedImageUrl: text("preview_live_normalized_image_url"),
+  previewRefNormalizedImageUrl: text("preview_ref_normalized_image_url"),
 });
 
 export const verificationsRelations = relations(verifications, ({ one }) => ({

@@ -6,7 +6,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Signature } from "lucide-react";
+import { SquareDashed } from "lucide-react";
 
 export const Route = createFileRoute("/_dashboard/signatures/")({
   component: RouteComponent,
@@ -18,7 +18,7 @@ function RouteComponent() {
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <Signature />
+            <SquareDashed />
           </EmptyMedia>
           <EmptyTitle>No Signature Selected</EmptyTitle>
           <EmptyDescription>

@@ -50,6 +50,11 @@ async def capture_fingerprint(file: UploadFile = File(...)):
                         "image": processor._to_base64(processed_data["normalized"]),
                         "type": "normalized",
                     },
+                    "preview": {
+                        "id": str(uuid.uuid4()),
+                        "image": processor._to_base64(processed_data["image_preview"]),
+                        "type": "preview",
+                    },
                 },
                 "metadata": {
                     "width": cleaned_image.shape[1],
@@ -75,23 +80,76 @@ async def verify_signature(
     try:
         live_bytes = await file.read()
         live_processor = SignatureProcessor(live_bytes)
-        live_processed = live_processor.process()
+        live_data = live_processor.process()
 
-        reference_bytes = await reference_file.read()
-        reference_processor = SignatureProcessor(reference_bytes)
-        reference_processed = reference_processor.process()
+        ref_bytes = await reference_file.read()
+        ref_processor = SignatureProcessor(ref_bytes)
+        ref_data = ref_processor.process()
 
         analyzer = SignatureAnalyzer()
-        similarity_score = analyzer.get_feature_similarity(
-            live_processed["siamese"], reference_processed["siamese"]
+        aligned_live, similarity_score = analyzer.align_signatures(
+            query_img=live_data["siamese"], ref_img=ref_data["siamese"]
         )
 
-        is_authentic = similarity_score > 0.20
+        is_authentic = False
+        status = "forged"
+
+        if similarity_score >= 0.25:
+            is_authentic = True
+            status = "authentic"
+        elif similarity_score >= 0.15:
+            is_authentic = False
+            status = "uncertain (requires manual review)"
+        elif similarity_score == 0:
+            status = "rejected (no matching features)"
+
+        overlap_viz = analyzer.get_overlap_viz(ref_data["siamese"], aligned_live)
+
+        preview_overlap_viz = analyzer.get_overlap_viz(
+            ref_data["siamese"], aligned_live, light_mode=True
+        )
 
         return {
-            "id": str(uuid.uuid4()),
-            "is_authentic": is_authentic,
-            "similarity_score": round(similarity_score, 4),
+            "message": "Verification completed successfully",
+            "data": {
+                "id": str(uuid.uuid4()),
+                "is_authentic": is_authentic,
+                "status": status,
+                "confidence_score": round(similarity_score, 4),
+                "confidence_percentage": f"{round(similarity_score * 100, 2)}%",
+                "visuals": {
+                    "overlap_viz": {
+                        "id": str(uuid.uuid4()),
+                        "image": live_processor._to_base64(overlap_viz),
+                        "type": "overlap_viz",
+                    },
+                    "live_normalized": {
+                        "id": str(uuid.uuid4()),
+                        "image": live_processor._to_base64(live_data["normalized"]),
+                        "type": "live_normalized",
+                    },
+                    "reference_normalized": {
+                        "id": str(uuid.uuid4()),
+                        "image": ref_processor._to_base64(ref_data["normalized"]),
+                        "type": "reference_normalized",
+                    },
+                    "preview_live_normalized": {
+                        "id": str(uuid.uuid4()),
+                        "image": live_processor._to_base64(live_data["image_preview"]),
+                        "type": "preview_live_normalized",
+                    },
+                    "preview_ref_normalized": {
+                        "id": str(uuid.uuid4()),
+                        "image": ref_processor._to_base64(ref_data["image_preview"]),
+                        "type": "preview_ref_normalized",
+                    },
+                    "preview_overlap_viz": {
+                        "id": str(uuid.uuid4()),
+                        "image": live_processor._to_base64(preview_overlap_viz),
+                        "type": "preview_overlap_viz",
+                    },
+                },
+            },
         }
 
     except ValueError as ve:

@@ -8,4 +8,5 @@ dependencies = [
     "fastapi[standard]>=0.129.0",
     "numpy>=2.4.2",
     "opencv-python>=4.13.0.92",
+    "scikit-image>=0.26.0",
 ]

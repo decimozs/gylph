@@ -99,11 +99,10 @@ class SignatureProcessor:
         return visualization
 
     def process(self):
-        """Processes self.raw_image and returns ROI and Siamese-ready arrays."""
         closing = self._run_pipeline(self.raw_image)
         valid_contours = self._extract_valid_contours(closing)
 
-        roi = normalized = siamese = closing
+        roi = normalized = siamese = image_preview = closing
 
         if valid_contours:
             all_points = np.vstack(valid_contours)
@@ -115,11 +114,15 @@ class SignatureProcessor:
             x1, x2 = max(0, x - pad), min(img_w, x + w + pad)
 
             roi = closing[y1:y2, x1:x2]
+
             normalized = self._prepare_siamese(roi)
             siamese = self._prepare_siamese(roi)
+
+            image_preview = cv2.bitwise_not(siamese)
 
         return {
             "roi": roi,
             "normalized": normalized,
             "siamese": siamese,
+            "image_preview": image_preview,
         }

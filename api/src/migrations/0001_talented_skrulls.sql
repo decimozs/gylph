@@ -1,0 +1,1 @@
+ALTER TABLE "signatures" ADD COLUMN "preview_image_url" text NOT NULL;

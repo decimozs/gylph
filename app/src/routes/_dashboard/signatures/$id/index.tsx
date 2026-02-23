@@ -37,6 +37,7 @@ function RouteComponent() {
     url: string;
     label: string;
     description: string;
+    bg: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -128,6 +129,7 @@ function RouteComponent() {
                     url: img.url || "",
                     label: img.label,
                     description: img.description,
+                    bg: img.bg,
                   })
                 }
                 className={`h-52 w-full ${img.bg} rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
@@ -144,7 +146,7 @@ function RouteComponent() {
       </div>
       <Separator />
       <div>
-        <p>
+        <p className="text-sm text-muted-foreground">
           Registered on{" "}
           {new Date(signature.createdAt).toLocaleString("en-US", {
             month: "long",
@@ -160,18 +162,11 @@ function RouteComponent() {
         open={!!selectedImage}
         onOpenChange={() => setSelectedImage(null)}
       >
-        <DialogContent>
+        <DialogContent className="max-h-200">
           <DialogHeader>
             <DialogTitle>{selectedImage?.label}</DialogTitle>
             <DialogDescription>{selectedImage?.description}</DialogDescription>
           </DialogHeader>
-          <div className="h-full w-full rounded-md border overflow-hidden">
-            <img
-              src={selectedImage?.url}
-              alt={selectedImage?.label}
-              className="h-full w-full object-contain"
-            />
-          </div>
         </DialogContent>
       </Dialog>
     </div>

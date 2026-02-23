@@ -7,6 +7,7 @@ export const signatures = pgTable("signatures", {
   ...baseSchema,
   name: text("name").notNull(),
   imageUrl: text("image_url").notNull(),
+  previewImageUrl: text("preview_image_url").notNull(),
 });
 
 export const signatureLogs = pgTable("signature_logs", {

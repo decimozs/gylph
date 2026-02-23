@@ -142,7 +142,7 @@ function Index() {
             </EmptyHeader>
             <EmptyContent>
               <Button size="lg">
-                <Plus className="h-4 w-4" />
+                <Plus className="mr-2 h-4 w-4" />
                 Register New Signature
               </Button>
             </EmptyContent>
@@ -240,7 +240,7 @@ function Index() {
                   size="lg"
                   onClick={handleCancel}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>
                 <form.Subscribe
@@ -252,9 +252,9 @@ function Index() {
                       disabled={!canSubmit || isSubmitting}
                     >
                       {isSubmitting ? (
-                        <Loader2 className="animate-spin h-4 w-4" />
+                        <Loader2 className="animate-spin mr-2 h-4 w-4" />
                       ) : (
-                        <Plus className="h-4 w-4" />
+                        <Plus className="mr-2 h-4 w-4" />
                       )}
                       {isSubmitting ? "Registering..." : "Register"}
                     </Button>

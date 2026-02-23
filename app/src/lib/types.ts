@@ -2,6 +2,7 @@ export interface Signature {
   id: string;
   name: string;
   imageUrl: string;
+  previewImageUrl: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +30,9 @@ export interface Verification {
   queryImageUrl: string;
   isAuthentic: boolean;
   similarityScore: number;
+  previewImageUrl: string;
   createdAt: string;
   updatedAt: string;
+  previewLiveNormalizedImageUrl: string;
+  previewRefNormalizedImageUrl: string;
 }

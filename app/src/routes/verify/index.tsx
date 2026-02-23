@@ -30,6 +30,7 @@ import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/lib/types";
+import { verificationQueries } from "@/hooks/use-verification";
 
 export const Route = createFileRoute("/verify/")({
   component: Index,
@@ -72,14 +73,15 @@ function Index() {
 
         if (res.ok) {
           const data: ApiResponse<{
-            transactionId: string;
+            verificationId: string;
             isAuthentic: boolean;
             similarityScore: number;
           }> = await res.json();
           toast.success("Verification complete!", { id: toastId });
+          queryClient.invalidateQueries(verificationQueries.getAll());
           navigate({
             to: "/verifications/$id",
-            params: { id: data.data.transactionId },
+            params: { id: data.data.verificationId },
           });
         } else {
           const errData = await res.json().catch(() => ({}));
@@ -152,7 +154,7 @@ function Index() {
             </EmptyHeader>
             <EmptyContent>
               <Button size="lg">
-                <CircleCheck className="h-4 w-4" />
+                <CircleCheck className="mr-2 h-4 w-4" />
                 Select Signature to Verify
               </Button>
             </EmptyContent>
@@ -213,7 +215,7 @@ function Index() {
                   size="lg"
                   onClick={handleCancel}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>
                 <form.Subscribe
@@ -225,9 +227,9 @@ function Index() {
                       disabled={!canSubmit || isSubmitting}
                     >
                       {isSubmitting ? (
-                        <Loader2 className="animate-spin h-4 w-4" />
+                        <Loader2 className="animate-spin mr-2 h-4 w-4" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4" />
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
                       )}
                       {isSubmitting ? "Verifying..." : "Run Verification"}
                     </Button>
