@@ -5,14 +5,15 @@ import {
   Link,
   Outlet,
   redirect,
-  useLocation,
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   BadgeAlert,
   BadgeCheck,
+  BadgeHelp,
   CircleCheck,
-  PenTool,
+  Eclipse,
+  FilePlusCorner,
   Search,
   Signature,
 } from "lucide-react";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/empty";
 import { useMatch } from "@tanstack/react-router";
 import { verificationQueries } from "@/hooks/use-verification";
+import Nav from "@/components/nav";
 
 export const Route = createFileRoute("/_dashboard/verifications")({
   loader: async ({ context }) => {
@@ -49,7 +51,6 @@ export const Route = createFileRoute("/_dashboard/verifications")({
 
 function RouteComponent() {
   const { data } = useSuspenseQuery(verificationQueries.getAll());
-  const { pathname } = useLocation();
   const [search, setSearch] = useQueryState("q", {
     defaultValue: "",
     shallow: false,
@@ -61,49 +62,31 @@ function RouteComponent() {
     shouldThrow: false,
   });
   const activeId = match?.params?.id;
-
   const filteredData = data.filter((item) =>
     item.id.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <div className="flex flex-row items-center justify-center">
+      <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-3">
-          <div className="bg-muted p-2 rounded-md w-fit">
-            <PenTool className="text-primary" />
-          </div>
-          <p className="text-2xl">Verifications</p>
+          <Link to="/">
+            <div className="bg-muted p-2 rounded-md w-fit">
+              <Eclipse className="text-primary" />
+            </div>
+          </Link>
+          <p className="text-2xl">Medcurial</p>
         </div>
+        <Link to="/extract">
+          <Button size="lg">
+            <FilePlusCorner className="mr-2 h-4 w-4" />
+            Upload Document
+          </Button>
+        </Link>
       </div>
       <div className="grid grid-cols-[350px_1fr] h-full gap-6 over overflow-y-auto">
         <div className="flex flex-col gap-4 overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
-            <Link to="/signatures">
-              <Button
-                className="rounded-md w-full"
-                size="lg"
-                variant={
-                  pathname.includes("/signatures") ? "default" : "outline"
-                }
-              >
-                <PenTool className="mr-2 h-4 w-4" />
-                Signatures
-              </Button>
-            </Link>
-            <Link to="/verifications">
-              <Button
-                className="rounded-md w-full"
-                size="lg"
-                variant={
-                  pathname.includes("/verifications") ? "default" : "outline"
-                }
-              >
-                <BadgeCheck className="mr-2 h-4 w-4" />
-                Verifications
-              </Button>
-            </Link>
-          </div>
+          <Nav />
           <Separator />
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -132,21 +115,48 @@ function RouteComponent() {
               {filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <Link
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("verificationId", item.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
                     to="/verifications/$id"
                     params={{ id: item.id }}
                     key={item.id}
                     className={`rounded-md overflow-hidden bg-white group relative ${activeId === item.id ? "border-2 border-primary" : ""}`}
                   >
                     <div className="absolute top-1 py-2 px-4">
-                      {item.isAuthentic ? (
-                        <div className="p-1 rounded-full bg-blue-500">
-                          <BadgeCheck className="text-white" />
-                        </div>
-                      ) : (
-                        <div className="p-1 rounded-full bg-red-500">
-                          <BadgeAlert className="text-white" />
-                        </div>
-                      )}
+                      {(() => {
+                        const score = parseFloat(String(item.similarityScore));
+                        if (score >= 0.8) {
+                          return (
+                            <div
+                              className="p-1 rounded-full bg-blue-500"
+                              title="Authentic"
+                            >
+                              <BadgeCheck className="text-white" />
+                            </div>
+                          );
+                        }
+                        if (score >= 0.7) {
+                          return (
+                            <div
+                              className="p-1 rounded-full bg-orange-500"
+                              title="Requires Review"
+                            >
+                              <BadgeHelp className="text-white" />
+                            </div>
+                          );
+                        }
+                        return (
+                          <div
+                            className="p-1 rounded-full bg-red-500"
+                            title="Rejected"
+                          >
+                            <BadgeAlert className="text-white" />
+                          </div>
+                        );
+                      })()}
                     </div>
                     <img
                       src={item.previewImageUrl}

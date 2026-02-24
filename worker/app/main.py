@@ -94,10 +94,10 @@ async def verify_signature(
         is_authentic = False
         status = "forged"
 
-        if similarity_score >= 0.25:
+        if similarity_score >= 0.80:
             is_authentic = True
             status = "authentic"
-        elif similarity_score >= 0.15:
+        elif similarity_score >= 0.70:
             is_authentic = False
             status = "uncertain (requires manual review)"
         elif similarity_score == 0:
@@ -160,7 +160,7 @@ async def verify_signature(
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"status": "online", "worker": "Signature Verification"}
 
 
 app.include_router(router)

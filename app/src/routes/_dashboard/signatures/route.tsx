@@ -6,10 +6,9 @@ import {
   Link,
   Outlet,
   redirect,
-  useLocation,
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { BadgeCheck, PenTool, Plus, Search, Signature } from "lucide-react";
+import { Eclipse, FilePlusCorner, Plus, Search, Signature } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useQueryState } from "nuqs";
@@ -21,6 +20,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { useMatch } from "@tanstack/react-router";
+import Nav from "@/components/nav";
 
 export const Route = createFileRoute("/_dashboard/signatures")({
   loader: async ({ context }) => {
@@ -42,7 +42,6 @@ export const Route = createFileRoute("/_dashboard/signatures")({
 
 function RouteComponent() {
   const { data } = useSuspenseQuery(signatureQueries.getAll());
-  const { pathname } = useLocation();
   const [search, setSearch] = useQueryState("q", {
     defaultValue: "",
     shallow: false,
@@ -63,42 +62,25 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <div className="flex flex-row items-center justify-center">
+      <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-3">
-          <div className="bg-muted p-2 rounded-md w-fit">
-            <PenTool className="text-primary" />
-          </div>
-          <p className="text-2xl">Signatures</p>
+          <Link to="/">
+            <div className="bg-muted p-2 rounded-md w-fit">
+              <Eclipse className="text-primary" />
+            </div>
+          </Link>
+          <p className="text-2xl">Medcurial</p>
         </div>
+        <Link to="/extract">
+          <Button size="lg">
+            <FilePlusCorner className="mr-2 h-4 w-4" />
+            Upload Document
+          </Button>
+        </Link>
       </div>
       <div className="grid grid-cols-[350px_1fr] h-full gap-6 over overflow-y-auto">
         <div className="flex flex-col gap-4 overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
-            <Link to="/signatures">
-              <Button
-                className="rounded-md w-full"
-                size="lg"
-                variant={
-                  pathname.includes("/signatures") ? "default" : "outline"
-                }
-              >
-                <PenTool className="mr-2 h-4 w-4" />
-                Signatures
-              </Button>
-            </Link>
-            <Link to="/verifications">
-              <Button
-                className="rounded-md w-full"
-                size="lg"
-                variant={
-                  pathname.includes("/verifications") ? "default" : "outline"
-                }
-              >
-                <BadgeCheck className="mr-2 h-4 w-4" />
-                Verifications
-              </Button>
-            </Link>
-          </div>
+          <Nav />
           <Separator />
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -127,6 +109,11 @@ function RouteComponent() {
               {filteredData.length > 0 ? (
                 filteredData.map((item) => (
                   <Link
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("signatureId", item.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
                     to="/signatures/$id"
                     params={{ id: item.id }}
                     key={item.id}

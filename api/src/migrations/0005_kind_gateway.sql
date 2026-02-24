@@ -1,0 +1,2 @@
+ALTER TABLE "documents" ADD COLUMN "verification_id" text;--> statement-breakpoint
+ALTER TABLE "documents" ADD CONSTRAINT "documents_verification_id_verifications_id_fk" FOREIGN KEY ("verification_id") REFERENCES "public"."verifications"("id") ON DELETE cascade ON UPDATE no action;

@@ -36,3 +36,13 @@ export interface Verification {
   previewLiveNormalizedImageUrl: string;
   previewRefNormalizedImageUrl: string;
 }
+
+export interface Document {
+  id: string;
+  signatureId: string;
+  verificationId: string;
+  url: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}

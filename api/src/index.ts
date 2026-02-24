@@ -25,10 +25,14 @@ const app = new Hono({ strict: false })
   .get("/signatures/:id", async (c) => {
     const { id } = c.req.param();
     const data = await db.query.signatures.findFirst({
-      where: (sig, { eq }) => eq(sig.id, id),
+      where: (table, { eq }) => eq(table.id, id),
       with: {
-        logs: true,
-        verifications: true,
+        logs: {
+          orderBy: (log, { desc }) => [desc(log.createdAt)],
+        },
+        verifications: {
+          orderBy: (ver, { desc }) => [desc(ver.createdAt)],
+        },
       },
     });
 
@@ -47,7 +51,7 @@ const app = new Hono({ strict: false })
   .get("/verifications/:id", async (c) => {
     const { id } = c.req.param();
     const data = await db.query.verifications.findFirst({
-      where: (sig, { eq }) => eq(sig.id, id),
+      where: (table, { eq }) => eq(table.id, id),
       with: {
         signature: true,
       },
@@ -55,6 +59,28 @@ const app = new Hono({ strict: false })
 
     if (!data) {
       return c.json({ error: "Verification not found" }, 404);
+    }
+
+    return c.json(data);
+  })
+  .get("/documents", async (c) => {
+    const data = await db.query.documents.findMany({
+      orderBy: (sig, { desc }) => [desc(sig.createdAt)],
+    });
+    return c.json(data);
+  })
+  .get("/documents/:id", async (c) => {
+    const { id } = c.req.param();
+    const data = await db.query.documents.findFirst({
+      where: (table, { eq }) => eq(table.id, id),
+      with: {
+        signatures: true,
+        verifications: true,
+      },
+    });
+
+    if (!data) {
+      return c.json({ error: "Document not found" }, 404);
     }
 
     return c.json(data);

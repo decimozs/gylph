@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"; // Added useNavigate
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Empty,
   EmptyContent,
@@ -7,12 +7,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Button } from "@/components/ui/button";
 import {
   PenTool,
   BadgeCheck,
   LineSquiggle,
-  LayoutDashboard,
+  SquareDashed,
+  Eclipse,
 } from "lucide-react";
 import {
   Select,
@@ -33,7 +33,9 @@ function RouteComponent() {
   const handleNavigation = (value: string) => {
     if (value === "register") navigate({ to: "/register" });
     if (value === "verify") navigate({ to: "/verify" });
-    if (value === "dashboard") navigate({ to: "/signatures" });
+    if (value === "extract") navigate({ to: "/extract" });
+    if (value === "signature-dashboard") navigate({ to: "/signatures" });
+    if (value === "verification-dashboard") navigate({ to: "/verifications" });
   };
 
   return (
@@ -41,27 +43,40 @@ function RouteComponent() {
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <LineSquiggle className="text-primary" />
+            <Eclipse className="text-primary" />
           </EmptyMedia>
-          <EmptyTitle>Signature Verification</EmptyTitle>
+          <EmptyTitle>Medcurial</EmptyTitle>
           <EmptyDescription>
-            Welcome to the verification dashboard. Register a new baseline
-            signature, run a verification check against an existing record, or
-            view global analytics.
+            Welcome to the ai powered claims verification dashboard. Register a
+            new baseline signature, run a verification check against an existing
+            record, or view global analytics.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex flex-row gap-3 justify-center mt-4">
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={() => navigate({ to: "/signatures" })}
-          >
-            <LayoutDashboard className="mr-2 w-4 h-4" />
-            Go to Dashboard
-          </Button>
+          <Select onValueChange={handleNavigation}>
+            <SelectTrigger className="w-45 min-h-10 px-4">
+              <SelectValue placeholder="Dashboard" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="signature-dashboard">
+                  <div className="flex items-center">
+                    <PenTool className="mr-2 w-4 h-4" />
+                    Signatures
+                  </div>
+                </SelectItem>
+                <SelectItem value="verification-dashboard">
+                  <div className="flex items-center">
+                    <BadgeCheck className="mr-2 w-4 h-4" />
+                    Verifications
+                  </div>
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
           <Select onValueChange={handleNavigation}>
-            <SelectTrigger className="w-[180px] min-h-10 px-4">
+            <SelectTrigger className="w-45 min-h-10 px-4">
               <SelectValue placeholder="Actions" />
             </SelectTrigger>
             <SelectContent>
@@ -76,6 +91,12 @@ function RouteComponent() {
                   <div className="flex items-center">
                     <BadgeCheck className="mr-2 w-4 h-4" />
                     Verify
+                  </div>
+                </SelectItem>
+                <SelectItem value="extract">
+                  <div className="flex items-center">
+                    <SquareDashed className="mr-2 w-4 h-4" />
+                    Extract
                   </div>
                 </SelectItem>
               </SelectGroup>

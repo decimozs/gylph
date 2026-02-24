@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { signatureQueries } from "@/hooks/use-signature";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -9,6 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  BadgeAlert,
+  BadgeCheck,
+  BadgeHelp,
   Check,
   Copy,
   Crop,
@@ -20,6 +23,17 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/_dashboard/signatures/$id/")({
   loader: async ({ context, params }) => {
@@ -40,6 +54,7 @@ function RouteComponent() {
     bg: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
 
   const originalImage = signature.imageUrl;
   const visImage = signature.logs.find((log) => log.type === "vis")?.imageUrl;
@@ -60,8 +75,58 @@ function RouteComponent() {
     }
   };
 
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const id = e.dataTransfer.getData("signatureId");
+
+    if (id) {
+      navigate({ to: "/signatures/$id", params: { id } });
+    }
+  };
+
+  const getVerificationStatus = (score: number) => {
+    const numScore = parseFloat(String(score));
+
+    if (numScore >= 0.8)
+      return {
+        label: "Authentic",
+        colorClass: "bg-blue-500",
+        borderClass: "bg-blue-50 border-blue-200",
+        textClass: "text-blue-700",
+        icon: <BadgeCheck className="text-white" size={18} />,
+      };
+
+    if (numScore >= 0.7)
+      return {
+        label: "Requires Review",
+        colorClass: "bg-orange-500",
+        borderClass: "bg-orange-50 border-orange-200",
+        textClass: "text-orange-700",
+        icon: <BadgeHelp className="text-white" size={18} />,
+      };
+
+    return {
+      label: "Rejected",
+      colorClass: "bg-red-500",
+      borderClass: "bg-red-50 border-red-200",
+      textClass: "text-red-700",
+      icon: <BadgeAlert className="text-white" size={18} />,
+    };
+  };
+
   return (
-    <div className="bg-muted/30 rounded-md h-full p-4 flex flex-col gap-4">
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDraggingOver(true);
+      }}
+      onDragLeave={() => setIsDraggingOver(false)}
+      onDrop={handleDrop}
+      className={`bg-muted/30 rounded-md h-full p-4 flex flex-col gap-4 ${isDraggingOver ? "border-2 border-dashed border-primary bg-primary/10" : ""}`}
+    >
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-4">
           <div className="bg-muted p-2 rounded-md w-fit">
@@ -82,6 +147,105 @@ function RouteComponent() {
         </div>
       </div>
       <Separator />
+      <div className="flex flex-row items-center gap-2">
+        <Sheet modal={false}>
+          <SheetTrigger asChild>
+            <Button variant="outline">Logs</Button>
+          </SheetTrigger>
+          <SheetContent className="min-w-125">
+            <SheetHeader>
+              <SheetTitle>Processing Logs</SheetTitle>
+              <SheetDescription>
+                Detailed logs of each step in the signature processing pipeline,
+                including timestamps, status updates, and any errors encountered
+                during the contourization, ROI extraction, and normalization
+                stages.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="px-6 flex flex-col gap-2 overflow-y-auto flex-1 rounded-md">
+              {signature.logs.map((log, index) => {
+                const logDescriptions = {
+                  roi: "Signature extracted based on its rect bound points.",
+                  vis: "Visual processing overlay applied.",
+                  preview: "Generating high-resolution preview.",
+                  normalized: "Image normalized for Siamese network input.",
+                  default: "Processing step completed.",
+                };
+                const description =
+                  logDescriptions[log.type] || logDescriptions.default;
+                return (
+                  <div
+                    key={index}
+                    className="p-4 border rounded-md mb-2 bg-input/30"
+                  >
+                    <div className="text-sm font-mono grid grid-cols-[100px_1fr] gap-1">
+                      <p className="text-primary">
+                        [ {new Date(log.createdAt).toLocaleTimeString()} ]{" "}
+                      </p>
+                      <p> {description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <SheetFooter></SheetFooter>
+          </SheetContent>
+        </Sheet>
+        <Sheet modal={false}>
+          <SheetTrigger asChild>
+            <Button variant="outline">Verifications</Button>
+          </SheetTrigger>
+          <SheetContent className="min-w-125">
+            <SheetHeader>
+              <SheetTitle>Verification History</SheetTitle>
+              <SheetDescription>
+                A chronological log of all verification attempts for this
+                signature, including timestamps, outcomes (success/failure), and
+                any relevant notes or metadata associated with each attempt.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="px-6 flex flex-col gap-2 overflow-y-auto flex-1 rounded-md">
+              {signature.verifications.map((verification, index) => {
+                const status = getVerificationStatus(
+                  verification.similarityScore,
+                );
+                return (
+                  <Link
+                    to="/verifications/$id"
+                    params={{ id: verification.id }}
+                    key={index}
+                    className={`p-4 border rounded-md mb-2 flex items-start gap-4 bg-input/30 hover:border-primary transition-all`}
+                  >
+                    <div
+                      className={`p-1.5 rounded-full shrink-0 ${status.colorClass}`}
+                      title={status.label}
+                    >
+                      {status.icon}
+                    </div>
+
+                    <div className="text-sm font-mono flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-primary">
+                          [{" "}
+                          {new Date(
+                            verification.createdAt,
+                          ).toLocaleTimeString()}{" "}
+                          ]
+                        </p>
+                      </div>
+                      <p>
+                        Verification {status.label.toLowerCase()} with a score
+                        of {(verification.similarityScore * 100).toFixed(1)}%.
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            <SheetFooter></SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
       <div className="flex items-center justify-center h-full">
         <div className="grid grid-cols-2 gap-6 mx-auto w-full max-w-5xl">
           {[
@@ -167,6 +331,15 @@ function RouteComponent() {
             <DialogTitle>{selectedImage?.label}</DialogTitle>
             <DialogDescription>{selectedImage?.description}</DialogDescription>
           </DialogHeader>
+          <div
+            className={`aspect-video w-full rounded-md border overflow-hidden ${selectedImage?.bg}`}
+          >
+            <img
+              src={selectedImage?.url}
+              alt={selectedImage?.label}
+              className="h-full w-full object-contain p-8"
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>

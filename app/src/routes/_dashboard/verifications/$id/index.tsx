@@ -1,15 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   BadgeAlert,
   BadgeCheck,
+  BadgeHelp,
   Blend,
   Check,
   Columns2,
   Copy,
   Fullscreen,
-  ShieldAlert,
-  ShieldCheck,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
@@ -52,6 +51,7 @@ function RouteComponent() {
     bg: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
 
   const handleCopyId = async () => {
     try {
@@ -73,30 +73,70 @@ function RouteComponent() {
     setTab(selectedTab);
   };
 
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const id = e.dataTransfer.getData("verificationId");
+
+    if (id) {
+      navigate({ to: "/verifications/$id", params: { id } });
+    }
+  };
+
   return (
-    <div className="bg-muted/30 rounded-md h-full p-4 flex flex-col gap-4">
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDraggingOver(true);
+      }}
+      onDragLeave={() => setIsDraggingOver(false)}
+      onDrop={handleDrop}
+      className={`bg-muted/30 rounded-md h-full p-4 flex flex-col gap-4 ${isDraggingOver ? "border-2 border-dashed border-primary bg-primary/10" : ""}`}
+    >
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-4">
           <div className="bg-muted p-2 rounded-md w-fit">
-            {verification.isAuthentic ? (
-              <BadgeCheck className="text-primary" />
-            ) : (
-              <BadgeAlert className="text-primary" />
-            )}
+            {(() => {
+              const score = parseFloat(String(verification.similarityScore));
+              if (score >= 0.8) {
+                return <BadgeCheck className="text-primary" />;
+              }
+              if (score >= 0.7) {
+                return <BadgeHelp className="text-primary" />;
+              }
+              return <BadgeAlert className="text-primary" />;
+            })()}
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-row items-center gap-4">
             <p className="text-2xl">
-              {verification.isAuthentic
-                ? "Authentic Signature"
-                : "Verification Failed"}
+              {(() => {
+                const score = parseFloat(String(verification.similarityScore));
+                if (score >= 0.8) {
+                  return "Authentic Signature";
+                }
+                if (score >= 0.7) {
+                  return "Requires Review";
+                }
+                return "Forged";
+              })()}
             </p>
+            <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full">
+                <p>
+                  {Math.round(Number(verification.similarityScore) * 100)} %
+                </p>
+                <p>Confidence</p>
+              </div>
+            </div>
           </div>
         </div>
         <div
           onClick={handleCopyId}
           className="flex flex-row items-center gap-3 border border-dashed px-4 py-2 rounded-md cursor-pointer hover:bg-muted/50 transition-colors group"
         >
-          <p className="text-sm font-mono">Verification Id: {id}</p>
+          <p className="text-sm font-mono">Id: {id}</p>
           {copied ? (
             <Check className="size-4 text-primary" />
           ) : (
@@ -105,19 +145,21 @@ function RouteComponent() {
         </div>
       </div>
       <Separator />
-      <div className="flex flex-row items-center gap-2">
-        <Button
-          onClick={() => toggleTab("comparison")}
-          variant={tab === "comparison" ? "default" : "outline"}
-        >
-          Compare
-        </Button>
-        <Button
-          onClick={() => toggleTab("heatmap")}
-          variant={tab === "heatmap" ? "default" : "outline"}
-        >
-          Heatmap
-        </Button>
+      <div className="flex flex-row items-center justify-between gap-2">
+        <div className="flex flex-row items-center gap-2">
+          <Button
+            onClick={() => toggleTab("comparison")}
+            variant={tab === "comparison" ? "default" : "outline"}
+          >
+            Compare
+          </Button>
+          <Button
+            onClick={() => toggleTab("heatmap")}
+            variant={tab === "heatmap" ? "default" : "outline"}
+          >
+            Heatmap
+          </Button>
+        </div>
       </div>
       <div className="flex items-center flex-col gap-4 justify-center h-full -mt-4">
         {tab === "comparison" ? (

@@ -27,22 +27,45 @@ class SignatureProcessor:
             image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 4
         )
 
-    def _apply_morphology(self, image):
-        repair_kernel = np.ones((1, 1), np.uint8)
-        dilated_image = cv2.dilate(image, repair_kernel, iterations=1)
+    def _apply_skeleton(self, image):
+        return cv2.ximgproc.thinning(image)
 
+    def _apply_morphology(self, image):
+        # Better noise removal
+        open_kernel = np.ones((2, 2), np.uint8)
+        opened = cv2.morphologyEx(image, cv2.MORPH_OPEN, open_kernel, iterations=1)
+
+        close_kernel = np.ones((3, 3), np.uint8)
+        closed = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, close_kernel, iterations=1)
+
+        # Remove small components
         num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
-            dilated_image, connectivity=8
+            closed, connectivity=8
         )
-        cleaned_binary = np.zeros_like(dilated_image)
+
+        cleaned_binary = np.zeros_like(closed)
         for j in range(1, num_labels):
             if stats[j, cv2.CC_STAT_AREA] > 60:
                 cleaned_binary[labels == j] = 255
 
-        connect_kernel = np.ones((3, 3), np.uint8)
-        return cv2.morphologyEx(
-            cleaned_binary, cv2.MORPH_CLOSE, connect_kernel, iterations=1
-        )
+        return cleaned_binary
+
+    def _skeletonize(self, image):
+        skel = np.zeros(image.shape, np.uint8)
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        img = image.copy()
+
+        while True:
+            eroded = cv2.erode(img, element)
+            temp = cv2.dilate(eroded, element)
+            temp = cv2.subtract(img, temp)
+            skel = cv2.bitwise_or(skel, temp)
+            img = eroded.copy()
+
+            if cv2.countNonZero(img) == 0:
+                break
+
+        return skel
 
     def _extract_valid_contours(self, closing_image):
         contours, _ = cv2.findContours(
@@ -71,7 +94,6 @@ class SignatureProcessor:
         return canvas
 
     def _to_base64(self, image_np: np.ndarray) -> str:
-        """Converts a numpy image array to a base64 string."""
         if image_np is None:
             return ""
         _, buffer = cv2.imencode(".png", image_np)
@@ -81,10 +103,10 @@ class SignatureProcessor:
         grayscale = self._apply_grayscale(image_data)
         blurred = self._apply_blur(grayscale)
         thresholded = self._apply_threshold(blurred)
-        return self._apply_morphology(thresholded)
+        morphed = self._apply_morphology(thresholded)
+        return morphed
 
     def get_visualization(self):
-        """Returns the original image with bounding boxes and contours drawn."""
         orig_rgb = cv2.cvtColor(self.raw_image, cv2.COLOR_BGR2RGB)
         closing = self._run_pipeline(self.raw_image)
         valid_contours = self._extract_valid_contours(closing)
@@ -114,10 +136,8 @@ class SignatureProcessor:
             x1, x2 = max(0, x - pad), min(img_w, x + w + pad)
 
             roi = closing[y1:y2, x1:x2]
-
             normalized = self._prepare_siamese(roi)
             siamese = self._prepare_siamese(roi)
-
             image_preview = cv2.bitwise_not(siamese)
 
         return {
