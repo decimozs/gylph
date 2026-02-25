@@ -57,7 +57,7 @@ export default function Nav() {
           <SelectItem value="chatbot">
             <div className="flex items-center">
               <Sparkle className="mr-2 w-4 h-4" />
-              Chatbot
+              {pathname === "/chatbot" ? "AI" : "Chat"}
             </div>
           </SelectItem>
         </SelectGroup>
