@@ -42,7 +42,9 @@ export interface Document {
   signatureId: string;
   verificationId: string;
   url: string;
+  previewImageUrl: string;
   name: string;
   createdAt: string;
   updatedAt: string;
+  status: string;
 }

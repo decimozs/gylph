@@ -20,6 +20,15 @@ dev:
 		"make dev-app" \
 		"make dev-worker"
 
+dev-without-worker:
+	bunx concurrently -n "API,APP" -c "magenta,cyan" \
+		"make dev-api" \
+		"make dev-app" a
+
+dev-infra:
+	bunx concurrently -n "API,WORKER" -c "cyan,green" \
+		"make dev-api" \
+		"make dev-worker"
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name "node_modules" -exec rm -rf {} +

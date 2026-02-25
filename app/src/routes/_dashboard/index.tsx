@@ -10,9 +10,10 @@ import {
 import {
   PenTool,
   BadgeCheck,
-  LineSquiggle,
   SquareDashed,
   Eclipse,
+  Sparkle,
+  Scroll,
 } from "lucide-react";
 import {
   Select,
@@ -36,6 +37,8 @@ function RouteComponent() {
     if (value === "extract") navigate({ to: "/extract" });
     if (value === "signature-dashboard") navigate({ to: "/signatures" });
     if (value === "verification-dashboard") navigate({ to: "/verifications" });
+    if (value === "document-dashboard") navigate({ to: "/documents" });
+    if (value === "chatbot") navigate({ to: "/chatbot" });
   };
 
   return (
@@ -69,6 +72,18 @@ function RouteComponent() {
                   <div className="flex items-center">
                     <BadgeCheck className="mr-2 w-4 h-4" />
                     Verifications
+                  </div>
+                </SelectItem>
+                <SelectItem value="document-dashboard">
+                  <div className="flex items-center">
+                    <Scroll className="mr-2 w-4 h-4" />
+                    Documents
+                  </div>
+                </SelectItem>
+                <SelectItem value="chatbot">
+                  <div className="flex items-center">
+                    <Sparkle className="mr-2 w-4 h-4" />
+                    Chatbot
                   </div>
                 </SelectItem>
               </SelectGroup>

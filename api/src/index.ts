@@ -27,6 +27,9 @@ const app = new Hono({ strict: false })
     const data = await db.query.signatures.findFirst({
       where: (table, { eq }) => eq(table.id, id),
       with: {
+        documents: {
+          orderBy: (log, { desc }) => [desc(log.createdAt)],
+        },
         logs: {
           orderBy: (log, { desc }) => [desc(log.createdAt)],
         },
@@ -65,6 +68,9 @@ const app = new Hono({ strict: false })
   })
   .get("/documents", async (c) => {
     const data = await db.query.documents.findMany({
+      with: {
+        verifications: true,
+      },
       orderBy: (sig, { desc }) => [desc(sig.createdAt)],
     });
     return c.json(data);
@@ -74,7 +80,7 @@ const app = new Hono({ strict: false })
     const data = await db.query.documents.findFirst({
       where: (table, { eq }) => eq(table.id, id),
       with: {
-        signatures: true,
+        signature: true,
         verifications: true,
       },
     });

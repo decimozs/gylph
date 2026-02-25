@@ -43,6 +43,20 @@
       "when": 1771938564293,
       "tag": "0005_kind_gateway",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771980589979,
+      "tag": "0006_real_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1771987154330,
+      "tag": "0007_nosy_vance_astro",
+      "breakpoints": true
     }
   ]
 }

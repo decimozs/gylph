@@ -9,6 +9,7 @@ export const documentQueries = {
     }),
   getById: (id: string) =>
     queryOptions({
+      enabled: !!id,
       queryKey: ["document", id],
       queryFn: () => getDocumentById(id),
     }),

@@ -2,6 +2,7 @@ import { pgTable, text } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { baseSchema } from "@/utils";
 import { verifications } from "./verifications";
+import { documents } from "./documents";
 
 export const signatures = pgTable("signatures", {
   ...baseSchema,
@@ -22,6 +23,7 @@ export const signatureLogs = pgTable("signature_logs", {
 export const signaturesRelations = relations(signatures, ({ many }) => ({
   logs: many(signatureLogs),
   verifications: many(verifications),
+  documents: many(documents),
 }));
 
 export const signatureLogsRelations = relations(signatureLogs, ({ one }) => ({

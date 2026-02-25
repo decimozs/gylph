@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   createFileRoute,
   Link,
@@ -7,20 +6,25 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Eclipse, FilePlusCorner, Files, Search } from "lucide-react";
+import {
+  Check,
+  CircleAlert,
+  Copy,
+  Eclipse,
+  FilePlusCorner,
+  Search,
+  Send,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useQueryState } from "nuqs";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { useMatch } from "@tanstack/react-router";
 import Nav from "@/components/nav";
-import { documentQueries } from "@/hooks/use-document";
+import { documentQueries, useGetDocumentById } from "@/hooks/use-document";
 import { Input } from "@/components/ui/input";
+import DocumentKanbanBoard from "@/components/document-kanban-board";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_dashboard/documents")({
   loader: async ({ context }) => {
@@ -53,12 +57,26 @@ function RouteComponent() {
     shouldThrow: false,
   });
   const activeId = match?.params?.id;
+  const { data: metadata } = useGetDocumentById(activeId || "");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const filteredData = data.filter(
     (item) =>
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.id.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const handleCopyId = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(id || "");
+      setCopiedId(id);
+      toast.success("Copied to clipboard");
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+      toast.error("Failed to copy");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -93,8 +111,131 @@ function RouteComponent() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          {activeId && (
+            <>
+              <Separator />
+              {metadata?.status === "needs-review" && (
+                <>
+                  <div className="bg-muted/30 rounded-md p-4 px-6">
+                    <div className="grid grid-cols-[100px_1fr] items-center gap-2">
+                      <p className="text-2xl">Actions</p>
+                      <Button className="w-full">
+                        <Send className="mr-2 w-4 h-4" />
+                        Send Review
+                      </Button>
+                    </div>
+                  </div>
+                  <Separator />
+                </>
+              )}
+              {metadata?.status === "forged" && (
+                <>
+                  <div className="bg-muted/30 rounded-md p-4 px-6">
+                    <div className="grid grid-cols-[100px_1fr] items-center gap-2">
+                      <p className="text-2xl">Actions</p>
+                      <Button className="w-full" variant="destructive">
+                        <CircleAlert className="mr-2 w-4 h-4" />
+                        Report
+                      </Button>
+                    </div>
+                  </div>
+                  <Separator />
+                </>
+              )}
+
+              <ScrollArea className="bg-muted/30 rounded-md h-full p-4 overflow-y-auto px-6">
+                <div className="flex flex-col gap-4 overflow-y-auto">
+                  <p className="text-2xl">Metadata</p>
+                  <Separator />
+                  <div className="flex flex-col gap-1">
+                    <p>Document Id</p>
+                    <div
+                      onClick={() => handleCopyId(activeId || "")}
+                      className="flex flex-row items-center justify-between border border-dashed px-4 py-2 rounded-md cursor-pointer hover:bg-muted/50 transition-colors group"
+                    >
+                      <p className="text-sm font-mono truncate max-w-50">
+                        {activeId}
+                      </p>
+                      {copiedId === activeId ? (
+                        <Check className="size-4 text-primary" />
+                      ) : (
+                        <Copy className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p>Verification Id</p>
+                    <div
+                      onClick={() =>
+                        handleCopyId(metadata?.verificationId || "")
+                      }
+                      className="flex flex-row items-center justify-between border border-dashed px-4 py-2 rounded-md cursor-pointer hover:bg-muted/50 transition-colors group"
+                    >
+                      <p className="text-sm font-mono truncate max-w-50">
+                        {metadata?.verificationId || "N/A"}
+                      </p>
+                      {copiedId === metadata?.verificationId ? (
+                        <Check className="size-4 text-primary" />
+                      ) : (
+                        <Copy className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p>Signature by</p>
+                    <Link
+                      to="/signatures/$id"
+                      className="w-fit hover:underline hover:text-primary transition-colors"
+                      params={{ id: metadata?.signatureId || "" }}
+                    >
+                      {metadata?.signature.name || ""}
+                    </Link>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p>Created at</p>
+                    <p>
+                      {new Date(metadata?.createdAt || "").toLocaleString(
+                        "en-US",
+                        {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        },
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <p>Last updated</p>
+                    <p>
+                      {new Date(metadata?.updatedAt || "").toLocaleString(
+                        "en-US",
+                        {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        },
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </ScrollArea>
+            </>
+          )}
         </div>
-        <Outlet />
+        <div className="grid grid-cols-[1fr_22%_22%_22%] gap-4 h-full max-h-screen overflow-hidden">
+          <Outlet />
+          <DocumentKanbanBoard data={filteredData} />
+        </div>
       </div>
     </div>
   );
