@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Activity,
   BadgeAlert,
   BadgeCheck,
   BadgeHelp,
@@ -33,6 +34,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 export const Route = createFileRoute("/_dashboard/signatures/$id/")({
   loader: async ({ context, params }) => {
@@ -131,7 +140,10 @@ function RouteComponent() {
           <div className="bg-muted p-2 rounded-md w-fit">
             <Signature className="text-primary" />
           </div>
-          <p className="text-2xl">Signature by {signature.name}</p>
+          <p className="text-2xl">
+            Signature by {signature.name}{" "}
+            <span className="text-primary">(SIG - {signature.no})</span>
+          </p>
         </div>
         <div
           onClick={handleCopyId}
@@ -161,32 +173,54 @@ function RouteComponent() {
                 stages.
               </SheetDescription>
             </SheetHeader>
-            <div className="px-6 flex flex-col gap-2 overflow-y-auto flex-1 rounded-md">
-              {signature.logs.map((log, index) => {
-                const logDescriptions = {
-                  roi: "Signature extracted based on its rect bound points.",
-                  vis: "Visual processing overlay applied.",
-                  preview: "Generating high-resolution preview.",
-                  normalized: "Image normalized for Siamese network input.",
-                  default: "Processing step completed.",
-                };
-                const description =
-                  logDescriptions[log.type] || logDescriptions.default;
-                return (
-                  <div
-                    key={index}
-                    className="p-4 border rounded-md mb-2 bg-input/30"
-                  >
-                    <div className="text-sm font-mono grid grid-cols-[100px_1fr] gap-1">
-                      <p className="text-primary">
-                        [ {new Date(log.createdAt).toLocaleTimeString()} ]{" "}
-                      </p>
-                      <p> {description}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {signature.logs.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Activity className="text-muted-foreground" />
+                    </EmptyMedia>
+                    <EmptyTitle>No Activity Logs</EmptyTitle>
+                    <EmptyDescription>
+                      Processing history for ROI extraction and neural network
+                      normalization is currently empty. Logs will generate
+                      automatically during the next verification sequence.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </div>
+            ) : (
+              <>
+                <Separator className="mx-6 mb-6" />
+                <ScrollArea className="px-6 flex flex-col gap-2 overflow-y-auto flex-1 rounded-md">
+                  {signature.logs.map((log, index) => {
+                    const logDescriptions = {
+                      roi: "Signature extracted based on its rect bound points.",
+                      vis: "Visual processing overlay applied.",
+                      preview: "Generating high-resolution preview.",
+                      normalized: "Image normalized for Siamese network input.",
+                      default: "Processing step completed.",
+                    };
+                    const description =
+                      logDescriptions[log.type] || logDescriptions.default;
+                    return (
+                      <div
+                        key={index}
+                        className="p-4 border rounded-md mb-2 bg-input/30"
+                      >
+                        <div className="text-sm font-mono grid grid-cols-[100px_1fr] gap-1">
+                          <p className="text-primary">
+                            [ {new Date(log.createdAt).toLocaleTimeString()}{" "}
+                            ]{" "}
+                          </p>
+                          <p> {description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </ScrollArea>
+              </>
+            )}
             <SheetFooter></SheetFooter>
           </SheetContent>
         </Sheet>
@@ -203,44 +237,66 @@ function RouteComponent() {
                 any relevant notes or metadata associated with each attempt.
               </SheetDescription>
             </SheetHeader>
-            <div className="px-6 flex flex-col gap-2 overflow-y-auto flex-1 rounded-md">
-              {signature.verifications.map((verification, index) => {
-                const status = getVerificationStatus(
-                  verification.similarityScore,
-                );
-                return (
-                  <Link
-                    to="/verifications/$id"
-                    params={{ id: verification.id }}
-                    key={index}
-                    className={`p-4 border rounded-md mb-2 flex items-start gap-4 bg-input/30 hover:border-primary transition-all`}
-                  >
-                    <div
-                      className={`p-1.5 rounded-full shrink-0 ${status.colorClass}`}
-                      title={status.label}
-                    >
-                      {status.icon}
-                    </div>
+            {signature.verifications.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <BadgeCheck className="text-muted-foreground" />
+                    </EmptyMedia>
+                    <EmptyTitle>No Verifications Yet</EmptyTitle>
+                    <EmptyDescription>
+                      This signature hasn't been used for any document checks.
+                      Once you perform a verification, the history and
+                      similarity scores will appear here.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </div>
+            ) : (
+              <>
+                <Separator className="mx-6 mb-6" />
+                <ScrollArea className="px-6 flex flex-col gap-2 overflow-y-auto flex-1 rounded-md">
+                  {signature.verifications.map((verification, index) => {
+                    const status = getVerificationStatus(
+                      verification.similarityScore,
+                    );
+                    return (
+                      <Link
+                        to="/verifications/$id"
+                        params={{ id: verification.id }}
+                        key={index}
+                        className={`p-4 border rounded-md mb-2 flex items-start gap-4 bg-input/30 hover:border-primary transition-all`}
+                      >
+                        <div
+                          className={`p-1.5 rounded-full shrink-0 ${status.colorClass}`}
+                          title={status.label}
+                        >
+                          {status.icon}
+                        </div>
 
-                    <div className="text-sm font-mono flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-primary">
-                          [{" "}
-                          {new Date(
-                            verification.createdAt,
-                          ).toLocaleTimeString()}{" "}
-                          ]
-                        </p>
-                      </div>
-                      <p>
-                        Verification {status.label.toLowerCase()} with a score
-                        of {(verification.similarityScore * 100).toFixed(1)}%.
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                        <div className="text-sm font-mono flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-primary">
+                              [{" "}
+                              {new Date(
+                                verification.createdAt,
+                              ).toLocaleTimeString()}{" "}
+                              ]
+                            </p>
+                          </div>
+                          <p>
+                            Verification {status.label.toLowerCase()} with a
+                            score of{" "}
+                            {(verification.similarityScore * 100).toFixed(1)}%.
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </ScrollArea>
+              </>
+            )}
             <SheetFooter></SheetFooter>
           </SheetContent>
         </Sheet>
@@ -284,7 +340,7 @@ function RouteComponent() {
             <div key={index} className="flex flex-col gap-4">
               <div className="flex flex-row items-center gap-4">
                 <div className="bg-muted p-2 rounded-md w-fit">{img.icon}</div>
-                <p className="text-xl font-medium">{img.label}</p>
+                <p className="text-xl">{img.label}</p>
               </div>
               <div
                 onClick={() =>
@@ -308,10 +364,21 @@ function RouteComponent() {
         </div>
       </div>
       <Separator />
-      <div>
+      <div className="flex flex-row items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Registered on{" "}
           {new Date(signature.createdAt).toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Last update on{" "}
+          {new Date(signature.updatedAt).toLocaleString("en-US", {
             month: "long",
             day: "numeric",
             year: "numeric",

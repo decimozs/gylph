@@ -17,14 +17,12 @@ export default function DocumentKanbanBoard({
   data: (Document & { verifications: Verification })[];
 }) {
   const authenticSignatures = data.filter(
-    (i) => i.status === "authentic",
+    (i) => i.verifications.status === "authentic",
   ).length;
   const needReviewSignatures = data.filter(
-    (i) => i.status === "needs-review",
+    (i) => i.verifications.status === "needs-review",
   ).length;
-  const forgedSignatures = data.filter((i) => i.status === "forged").length;
-
-  console.log(data);
+  const forgedSignatures = data.filter((i) => i.verifications.status === "forged").length;
 
   return (
     <>
@@ -40,7 +38,7 @@ export default function DocumentKanbanBoard({
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.status === "authentic",
+            (item) => item.verifications.status === "authentic",
           );
 
           if (filteredData.length > 0) {
@@ -130,7 +128,7 @@ export default function DocumentKanbanBoard({
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.status === "needs-review",
+            (item) => item.verifications.status === "needs-review",
           );
 
           if (filteredData.length > 0) {
@@ -220,7 +218,9 @@ export default function DocumentKanbanBoard({
         </div>
         <Separator />
         {(() => {
-          const filteredData = data.filter((item) => item.status === "forged");
+          const filteredData = data.filter(
+            (item) => item.verifications.status === "forged",
+          );
 
           if (filteredData.length > 0) {
             return (

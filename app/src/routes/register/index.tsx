@@ -33,6 +33,7 @@ export const Route = createFileRoute("/register/")({
 
 const formSchema = z.object({
   signatoryName: z.string().min(1, "Signatory name is required"),
+  email: z.string().email("Please enter a valid email address"),
   signatureImage: z.any().refine((file) => file instanceof File, {
     message: "Signature image is required",
   }),
@@ -46,16 +47,18 @@ function Index() {
   const form = useForm({
     defaultValues: {
       signatoryName: "",
+      email: "",
       signatureImage: null as File | null,
     },
     validators: {
       onChange: formSchema,
     },
     onSubmit: async ({ value }) => {
-      if (!value.signatureImage || !value.signatoryName) return;
+      if (!value.signatureImage || !value.signatoryName || !value.email) return;
 
       const formData = new FormData();
       formData.append("signatory_name", value.signatoryName);
+      formData.append("email", value.email);
       formData.append("signature_image", value.signatureImage);
 
       const toastId = toast.loading("Processing signature...");
@@ -190,6 +193,40 @@ function Index() {
                         <FieldDescription>
                           Provide the official name associated with this
                           signature baseline.
+                        </FieldDescription>
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+
+              <form.Field
+                name="email"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        Email Address
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="email"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        autoComplete="email"
+                        placeholder="e.g., john@example.com"
+                      />
+                      {isInvalid ? (
+                        <FieldError errors={field.state.meta.errors} />
+                      ) : (
+                        <FieldDescription>
+                          The contact email for verification identity requests.
                         </FieldDescription>
                       )}
                     </Field>

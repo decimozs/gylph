@@ -99,11 +99,10 @@ function RouteComponent() {
         <div className="flex flex-row items-center gap-4">
           <div className="bg-muted p-2 rounded-md w-fit">
             {(() => {
-              const score = parseFloat(String(verification.similarityScore));
-              if (score >= 0.8) {
+              if (verification.status === "authentic") {
                 return <BadgeCheck className="text-primary" />;
               }
-              if (score >= 0.7) {
+              if (verification.status === "needs-review") {
                 return <BadgeHelp className="text-primary" />;
               }
               return <BadgeAlert className="text-primary" />;
@@ -112,15 +111,15 @@ function RouteComponent() {
           <div className="flex flex-row items-center gap-4">
             <p className="text-2xl">
               {(() => {
-                const score = parseFloat(String(verification.similarityScore));
-                if (score >= 0.8) {
+                if (verification.status === "authentic") {
                   return "Authentic Signature";
                 }
-                if (score >= 0.7) {
+                if (verification.status === "needs-review") {
                   return "Requires Review";
                 }
                 return "Forged";
-              })()}
+              })()}{" "}
+              <span className="text-primary">(VRF - {verification.no})</span>
             </p>
             <div className="flex flex-row items-center gap-2">
               <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full">
@@ -327,10 +326,21 @@ function RouteComponent() {
         )}
       </div>
       <Separator />
-      <div>
+      <div className="flex flex-row items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Verified on{" "}
           {new Date(verification.createdAt).toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Last update on{" "}
+          {new Date(verification.updatedAt).toLocaleString("en-US", {
             month: "long",
             day: "numeric",
             year: "numeric",

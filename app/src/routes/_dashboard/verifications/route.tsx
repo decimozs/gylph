@@ -8,9 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
-  BadgeAlert,
-  BadgeCheck,
-  BadgeHelp,
   CircleCheck,
   Eclipse,
   FilePlusCorner,
@@ -30,6 +27,8 @@ import {
 import { useMatch } from "@tanstack/react-router";
 import { verificationQueries } from "@/hooks/use-verification";
 import Nav from "@/components/nav";
+import ActionsButton from "@/components/actions-button";
+import VerificationBadge from "@/components/verification-badge";
 
 export const Route = createFileRoute("/_dashboard/verifications")({
   loader: async ({ context }) => {
@@ -101,14 +100,12 @@ function RouteComponent() {
           </div>
           <Separator />
           <Link to="/verify">
-            <Button
-              size="lg"
-              className="w-full hover:bg-primary hover:text-secondary"
-              variant="secondary"
-            >
-              <CircleCheck className="mr-2 h-4 w-4" />
-              Verify Signature
-            </Button>
+            <ActionsButton
+              props={{
+                icon: CircleCheck,
+                label: "Verify Signature",
+              }}
+            />
           </Link>
           <ScrollArea className="bg-muted/30 rounded-md h-full p-4 overflow-y-auto px-6">
             <div className="flex flex-col gap-4 overflow-y-auto">
@@ -126,37 +123,7 @@ function RouteComponent() {
                     className={`rounded-md overflow-hidden bg-white group relative ${activeId === item.id ? "border-2 border-primary" : ""}`}
                   >
                     <div className="absolute top-1 py-2 px-4">
-                      {(() => {
-                        const score = parseFloat(String(item.similarityScore));
-                        if (score >= 0.8) {
-                          return (
-                            <div
-                              className="p-1 rounded-full bg-blue-500"
-                              title="Authentic"
-                            >
-                              <BadgeCheck className="text-white" />
-                            </div>
-                          );
-                        }
-                        if (score >= 0.7) {
-                          return (
-                            <div
-                              className="p-1 rounded-full bg-orange-500"
-                              title="Requires Review"
-                            >
-                              <BadgeHelp className="text-white" />
-                            </div>
-                          );
-                        }
-                        return (
-                          <div
-                            className="p-1 rounded-full bg-red-500"
-                            title="Rejected"
-                          >
-                            <BadgeAlert className="text-white" />
-                          </div>
-                        );
-                      })()}
+                      <VerificationBadge status={item.status} />
                     </div>
                     <img
                       src={item.previewImageUrl}

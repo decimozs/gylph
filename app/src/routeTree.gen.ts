@@ -16,6 +16,7 @@ import { Route as DashboardIndexRouteImport } from './routes/_dashboard/index'
 import { Route as DashboardVerificationsRouteRouteImport } from './routes/_dashboard/verifications/route'
 import { Route as DashboardSignaturesRouteRouteImport } from './routes/_dashboard/signatures/route'
 import { Route as DashboardDocumentsRouteRouteImport } from './routes/_dashboard/documents/route'
+import { Route as ReviewIdIndexRouteImport } from './routes/review/$id/index'
 import { Route as DashboardVerificationsIndexRouteImport } from './routes/_dashboard/verifications/index'
 import { Route as DashboardSignaturesIndexRouteImport } from './routes/_dashboard/signatures/index'
 import { Route as DashboardDocumentsIndexRouteImport } from './routes/_dashboard/documents/index'
@@ -59,6 +60,11 @@ const DashboardSignaturesRouteRoute =
 const DashboardDocumentsRouteRoute = DashboardDocumentsRouteRouteImport.update({
   id: '/_dashboard/documents',
   path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewIdIndexRoute = ReviewIdIndexRouteImport.update({
+  id: '/review/$id/',
+  path: '/review/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardVerificationsIndexRoute =
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/documents/': typeof DashboardDocumentsIndexRoute
   '/signatures/': typeof DashboardSignaturesIndexRoute
   '/verifications/': typeof DashboardVerificationsIndexRoute
+  '/review/$id/': typeof ReviewIdIndexRoute
   '/documents/$id/': typeof DashboardDocumentsIdIndexRoute
   '/signatures/$id/': typeof DashboardSignaturesIdIndexRoute
   '/verifications/$id/': typeof DashboardVerificationsIdIndexRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/documents': typeof DashboardDocumentsIndexRoute
   '/signatures': typeof DashboardSignaturesIndexRoute
   '/verifications': typeof DashboardVerificationsIndexRoute
+  '/review/$id': typeof ReviewIdIndexRoute
   '/documents/$id': typeof DashboardDocumentsIdIndexRoute
   '/signatures/$id': typeof DashboardSignaturesIdIndexRoute
   '/verifications/$id': typeof DashboardVerificationsIdIndexRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/_dashboard/documents/': typeof DashboardDocumentsIndexRoute
   '/_dashboard/signatures/': typeof DashboardSignaturesIndexRoute
   '/_dashboard/verifications/': typeof DashboardVerificationsIndexRoute
+  '/review/$id/': typeof ReviewIdIndexRoute
   '/_dashboard/documents/$id/': typeof DashboardDocumentsIdIndexRoute
   '/_dashboard/signatures/$id/': typeof DashboardSignaturesIdIndexRoute
   '/_dashboard/verifications/$id/': typeof DashboardVerificationsIdIndexRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/documents/'
     | '/signatures/'
     | '/verifications/'
+    | '/review/$id/'
     | '/documents/$id/'
     | '/signatures/$id/'
     | '/verifications/$id/'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/signatures'
     | '/verifications'
+    | '/review/$id'
     | '/documents/$id'
     | '/signatures/$id'
     | '/verifications/$id'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/_dashboard/documents/'
     | '/_dashboard/signatures/'
     | '/_dashboard/verifications/'
+    | '/review/$id/'
     | '/_dashboard/documents/$id/'
     | '/_dashboard/signatures/$id/'
     | '/_dashboard/verifications/$id/'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   RegisterIndexRoute: typeof RegisterIndexRoute
   VerifyIndexRoute: typeof VerifyIndexRoute
   DashboardChatbotIndexRoute: typeof DashboardChatbotIndexRoute
+  ReviewIdIndexRoute: typeof ReviewIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -256,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof DashboardDocumentsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review/$id/': {
+      id: '/review/$id/'
+      path: '/review/$id'
+      fullPath: '/review/$id/'
+      preLoaderRoute: typeof ReviewIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dashboard/verifications/': {
@@ -368,6 +388,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterIndexRoute: RegisterIndexRoute,
   VerifyIndexRoute: VerifyIndexRoute,
   DashboardChatbotIndexRoute: DashboardChatbotIndexRoute,
+  ReviewIdIndexRoute: ReviewIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

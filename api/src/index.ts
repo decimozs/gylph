@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { db } from "./db";
+import { verifications, type UpdateVerification } from "./schema";
+import { eq } from "drizzle-orm";
 
 const app = new Hono({ strict: false })
   .basePath("/api/v1")
@@ -65,6 +67,22 @@ const app = new Hono({ strict: false })
     }
 
     return c.json(data);
+  })
+  .put("/verifications/:id", async (c) => {
+    const { id } = c.req.param();
+    const body: UpdateVerification = await c.req.json();
+
+    const data = await db
+      .update(verifications)
+      .set(body)
+      .where(eq(verifications.id, id))
+      .returning();
+
+    if (data.length === 0) {
+      return c.json({ error: "Verification not found" }, 404);
+    }
+
+    return c.json(data[0]);
   })
   .get("/documents", async (c) => {
     const data = await db.query.documents.findMany({

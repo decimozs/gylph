@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/empty";
 import { useMatch } from "@tanstack/react-router";
 import Nav from "@/components/nav";
+import ActionsButton from "@/components/actions-button";
 
 export const Route = createFileRoute("/_dashboard/signatures")({
   loader: async ({ context }) => {
@@ -95,14 +96,12 @@ function RouteComponent() {
           </div>
           <Separator />
           <Link to="/register">
-            <Button
-              size="lg"
-              className="w-full hover:bg-primary hover:text-secondary"
-              variant="secondary"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Register Signature
-            </Button>
+            <ActionsButton
+              props={{
+                icon: Plus,
+                label: "Register Signature",
+              }}
+            />
           </Link>
           <ScrollArea className="bg-muted/30 rounded-md h-full p-4 overflow-y-auto px-6">
             <div className="flex flex-col gap-4 overflow-y-auto">

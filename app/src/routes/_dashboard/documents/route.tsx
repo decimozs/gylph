@@ -25,6 +25,7 @@ import DocumentKanbanBoard from "@/components/document-kanban-board";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { toast } from "sonner";
+import ActionsButton from "@/components/actions-button";
 
 export const Route = createFileRoute("/_dashboard/documents")({
   loader: async ({ context }) => {
@@ -114,38 +115,38 @@ function RouteComponent() {
           {activeId && (
             <>
               <Separator />
-              {metadata?.status === "needs-review" && (
+              {metadata?.verifications.status === "needs-review" && (
                 <>
-                  <div className="bg-muted/30 rounded-md p-4 px-6">
-                    <div className="grid grid-cols-[100px_1fr] items-center gap-2">
-                      <p className="text-2xl">Actions</p>
-                      <Button className="w-full">
-                        <Send className="mr-2 w-4 h-4" />
-                        Send Review
-                      </Button>
-                    </div>
-                  </div>
+                  <ActionsButton
+                    props={{
+                      icon: Send,
+                      label: "Send Review",
+                    }}
+                  />
                   <Separator />
                 </>
               )}
-              {metadata?.status === "forged" && (
+              {metadata?.verifications.status === "forged" && (
                 <>
-                  <div className="bg-muted/30 rounded-md p-4 px-6">
-                    <div className="grid grid-cols-[100px_1fr] items-center gap-2">
-                      <p className="text-2xl">Actions</p>
-                      <Button className="w-full" variant="destructive">
-                        <CircleAlert className="mr-2 w-4 h-4" />
-                        Report
-                      </Button>
-                    </div>
-                  </div>
+                  <ActionsButton
+                    props={{
+                      icon: CircleAlert,
+                      label: "Report",
+                      variant: "destructive",
+                    }}
+                  />
                   <Separator />
                 </>
               )}
 
               <ScrollArea className="bg-muted/30 rounded-md h-full p-4 overflow-y-auto px-6">
                 <div className="flex flex-col gap-4 overflow-y-auto">
-                  <p className="text-2xl">Metadata</p>
+                  <p className="text-2xl">
+                    Document #{metadata?.no}{" "}
+                    <span className="text-primary">
+                      (DCM - {metadata?.no})
+                    </span>{" "}
+                  </p>
                   <Separator />
                   <div className="flex flex-col gap-1">
                     <p>Document Id</p>
@@ -183,15 +184,24 @@ function RouteComponent() {
                     </div>
                   </div>
 
+                  {metadata?.status === "authentic" && (
+                    <div className="flex flex-col gap-1">
+                      <p>Signature by</p>
+                      <Link
+                        to="/signatures/$id"
+                        className="w-fit hover:underline hover:text-primary transition-colors"
+                        params={{ id: metadata?.signatureId || "" }}
+                      >
+                        {metadata?.signature.name || ""}
+                      </Link>
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-1">
-                    <p>Signature by</p>
-                    <Link
-                      to="/signatures/$id"
-                      className="w-fit hover:underline hover:text-primary transition-colors"
-                      params={{ id: metadata?.signatureId || "" }}
-                    >
-                      {metadata?.signature.name || ""}
-                    </Link>
+                    <p>Filename</p>
+                    <p className="truncate max-w-75">
+                      {metadata?.name || "N/A"}
+                    </p>
                   </div>
 
                   <div className="flex flex-col gap-1">

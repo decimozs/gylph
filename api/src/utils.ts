@@ -1,8 +1,9 @@
-import { text, timestamp } from "drizzle-orm/pg-core";
+import { serial, text, timestamp } from "drizzle-orm/pg-core";
 import type { ZodObject } from "zod";
 
 export const baseSchema = {
   id: text("id").notNull().primaryKey(),
+  no: serial("no"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

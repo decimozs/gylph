@@ -20,9 +20,9 @@ function RouteComponent() {
   const { data: document } = useSuspenseQuery(documentQueries.getById(id));
   const navigate = useNavigate();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [imageType, setImageType] = useState<"original" | "processed">(
-    "original",
-  );
+  const [imageType, setImageType] = useState<
+    "original" | "processed" | "markdown"
+  >("original");
 
   const currentImageUrl =
     imageType === "original" ? document.url : document.previewImageUrl;
@@ -40,7 +40,8 @@ function RouteComponent() {
 
   const isPDF = currentImageUrl?.toLowerCase().endsWith(".pdf");
 
-  const handleImageTab = (tab: "original" | "processed") => setImageType(tab);
+  const handleImageTab = (tab: "original" | "processed" | "markdown") =>
+    setImageType(tab);
 
   return (
     <div
@@ -68,6 +69,12 @@ function RouteComponent() {
             onClick={() => handleImageTab("processed")}
           >
             Processed
+          </Button>
+          <Button
+            variant={imageType === "markdown" ? "default" : "outline"}
+            onClick={() => handleImageTab("markdown")}
+          >
+            Markdown
           </Button>
         </div>
         <div className="flex flex-row items-center gap-2">
