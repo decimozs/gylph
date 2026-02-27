@@ -2,13 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { signatureQueries } from "@/hooks/use-signature";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Activity,
   BadgeAlert,
   BadgeCheck,
@@ -16,6 +9,7 @@ import {
   Check,
   Copy,
   Crop,
+  ExternalLink,
   Fullscreen,
   Image,
   ImageUp,
@@ -42,6 +36,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import Loader from "@/components/loader";
 
 export const Route = createFileRoute("/_dashboard/signatures/$id/")({
   loader: async ({ context, params }) => {
@@ -50,17 +45,12 @@ export const Route = createFileRoute("/_dashboard/signatures/$id/")({
     );
   },
   component: RouteComponent,
+  pendingComponent: Loader,
 });
 
 function RouteComponent() {
   const { id } = Route.useParams();
   const { data: signature } = useSuspenseQuery(signatureQueries.getById(id));
-  const [selectedImage, setSelectedImage] = useState<{
-    url: string;
-    label: string;
-    description: string;
-    bg: string;
-  } | null>(null);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
@@ -343,16 +333,18 @@ function RouteComponent() {
                 <p className="text-xl">{img.label}</p>
               </div>
               <div
-                onClick={() =>
-                  setSelectedImage({
-                    url: img.url || "",
-                    label: img.label,
-                    description: img.description,
-                    bg: img.bg,
-                  })
-                }
-                className={`h-52 w-full ${img.bg} rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
+                className={`relative h-52 w-full ${img.bg} rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
               >
+                <div className="absolute top-3 right-3 flex flex-row items-center gap-2">
+                  <Button
+                    className="rounded-full"
+                    size="icon-lg"
+                    variant="secondary"
+                    onClick={() => window.open(img.url, "_blank")}
+                  >
+                    <ExternalLink />
+                  </Button>
+                </div>
                 <img
                   src={img.url}
                   alt={img.label}
@@ -388,26 +380,6 @@ function RouteComponent() {
           })}
         </p>
       </div>
-      <Dialog
-        open={!!selectedImage}
-        onOpenChange={() => setSelectedImage(null)}
-      >
-        <DialogContent className="max-h-200">
-          <DialogHeader>
-            <DialogTitle>{selectedImage?.label}</DialogTitle>
-            <DialogDescription>{selectedImage?.description}</DialogDescription>
-          </DialogHeader>
-          <div
-            className={`aspect-video w-full rounded-md border overflow-hidden ${selectedImage?.bg}`}
-          >
-            <img
-              src={selectedImage?.url}
-              alt={selectedImage?.label}
-              className="h-full w-full object-contain p-8"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

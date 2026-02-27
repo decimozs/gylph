@@ -8,6 +8,7 @@ import {
   Check,
   Columns2,
   Copy,
+  ExternalLink,
   Fullscreen,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -25,8 +26,20 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import Loader from "@/components/loader";
 
 export const Route = createFileRoute("/_dashboard/verifications/$id/")({
   loader: async ({ context, params }) => {
@@ -35,6 +48,7 @@ export const Route = createFileRoute("/_dashboard/verifications/$id/")({
     );
   },
   component: RouteComponent,
+  pendingComponent: Loader,
 });
 
 function RouteComponent() {
@@ -52,6 +66,9 @@ function RouteComponent() {
   } | null>(null);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+  const [imageType, setImageType] = useState<
+    "original" | "processed" | "markdown"
+  >("original");
 
   const handleCopyId = async () => {
     try {
@@ -84,6 +101,15 @@ function RouteComponent() {
       navigate({ to: "/verifications/$id", params: { id } });
     }
   };
+
+  const currentImageUrl =
+    (imageType === "original"
+      ? verification?.document?.url
+      : verification?.document?.previewImageUrl) || "";
+
+  const isPDF = currentImageUrl.toLowerCase().endsWith(".pdf");
+  const handleImageTab = (tab: "original" | "processed" | "markdown") =>
+    setImageType(tab);
 
   return (
     <div
@@ -158,6 +184,97 @@ function RouteComponent() {
           >
             Heatmap
           </Button>
+          {verification.document && (
+            <Sheet modal={false}>
+              <SheetTrigger asChild>
+                <Button variant="outline">Document</Button>
+              </SheetTrigger>
+              <SheetContent className="min-w-125">
+                <SheetHeader>
+                  <SheetTitle>Document</SheetTitle>
+                  <SheetDescription>
+                    {verification.document.name || "No document name available"}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="px-6 flex flex-col gap-4">
+                  <Separator />
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="flex flex-row items-center gap-2">
+                      <Button
+                        variant={
+                          imageType === "original" ? "default" : "outline"
+                        }
+                        onClick={() => handleImageTab("original")}
+                      >
+                        Original
+                      </Button>
+                      <Button
+                        variant={
+                          imageType === "processed" ? "default" : "outline"
+                        }
+                        onClick={() => handleImageTab("processed")}
+                      >
+                        Processed
+                      </Button>
+                      <Button
+                        variant={
+                          imageType === "markdown" ? "default" : "outline"
+                        }
+                        onClick={() => handleImageTab("markdown")}
+                      >
+                        Extraction
+                      </Button>
+                    </div>
+                    {imageType !== "markdown" && (
+                      <div className="flex flex-row items-center gap-2">
+                        <Button
+                          className="rounded-full"
+                          size="icon-lg"
+                          variant="secondary"
+                          onClick={() => window.open(currentImageUrl, "_blank")}
+                        >
+                          <ExternalLink />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 overflow-hidden rounded-md">
+                    {imageType === "markdown" ? (
+                      <ScrollArea className="h-full w-full p-6 text-left prose prose-sm dark:prose-invert max-w-none border border-dashed">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {verification.document.markdown ||
+                            "*No markdown content available*"}
+                        </ReactMarkdown>
+                      </ScrollArea>
+                    ) : isPDF ? (
+                      <iframe
+                        src={`${currentImageUrl}#toolbar=0&navpanes=0`}
+                        className="h-full w-full pointer-events-none rounded-md"
+                        title={verification.document.name}
+                      />
+                    ) : (
+                      <img
+                        src={currentImageUrl}
+                        alt={verification.document.name}
+                        className="h-full w-full object-contain rounded-md"
+                      />
+                    )}
+                  </div>
+                </div>
+                <SheetFooter>
+                  <Link
+                    to="/documents/$id"
+                    params={{ id: verification.document.id }}
+                    preload="intent"
+                  >
+                    <Button size="lg" variant="secondary" className="w-full">
+                      Go to document
+                    </Button>
+                  </Link>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
       <div className="flex items-center flex-col gap-4 justify-center h-full -mt-4">
@@ -206,80 +323,66 @@ function RouteComponent() {
               />
             ) : (
               <div className="grid grid-cols-2 gap-4">
-                <Dialog>
-                  <DialogTrigger>
-                    <div className="flex flex-col gap-4">
-                      <div
-                        className={`h-100 w-full bg-white rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
+                <div className="flex flex-col gap-4">
+                  <div
+                    className={`relative h-100 w-full bg-white rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
+                  >
+                    <div className="absolute top-3 right-3 flex flex-row items-center gap-2">
+                      <Button
+                        className="rounded-full"
+                        size="icon-lg"
+                        variant="secondary"
+                        onClick={() =>
+                          window.open(
+                            verification.previewLiveNormalizedImageUrl,
+                            "_blank",
+                          )
+                        }
                       >
-                        <img
-                          src={verification.previewLiveNormalizedImageUrl}
-                          alt={`${verification.id}-live-normalized`}
-                          className="h-full w-full object-contain p-4"
-                        />
-                      </div>
-                      <p>Query Signature</p>
+                        <ExternalLink />
+                      </Button>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Query Signature</DialogTitle>
-                      <DialogDescription>
-                        This is the query signature that was submitted for
-                        verification.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div
-                      className={`h-full w-full rounded-md border overflow-hidden bg-white`}
-                    >
-                      <img
-                        src={verification.previewLiveNormalizedImageUrl}
-                        alt={`${verification.id}-live-normalized`}
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Dialog>
-                  <DialogTrigger>
-                    <div className="flex flex-col gap-4">
-                      <div
-                        className={`h-100 w-full bg-white rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
+                    <img
+                      src={verification.previewLiveNormalizedImageUrl}
+                      alt={`${verification.id}-live-normalized`}
+                      className="h-full w-full object-contain p-4"
+                    />
+                  </div>
+                  <p className="text-center">Query Signature</p>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div
+                    className={`relative h-100 w-full bg-white rounded-md border flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all`}
+                  >
+                    <div className="absolute top-3 right-3 flex flex-row items-center gap-2">
+                      <Button
+                        className="rounded-full"
+                        size="icon-lg"
+                        variant="secondary"
+                        onClick={() =>
+                          window.open(
+                            verification.previewRefNormalizedImageUrl,
+                            "_blank",
+                          )
+                        }
                       >
-                        <img
-                          src={verification.previewRefNormalizedImageUrl}
-                          alt={`${verification.id}-ref-normalized`}
-                          className="h-full w-full object-contain p-4"
-                        />
-                      </div>
-                      <Link
-                        to="/signatures/$id"
-                        params={{ id: verification.signatureId }}
-                        className="hover:underline hover:text-primary transition-colors"
-                      >
-                        Reference Signature
-                      </Link>
+                        <ExternalLink />
+                      </Button>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Reference Signature</DialogTitle>
-                      <DialogDescription>
-                        This is the reference signature that was used for
-                        comparison.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div
-                      className={`h-full w-full rounded-md border overflow-hidden bg-white`}
-                    >
-                      <img
-                        src={verification.previewRefNormalizedImageUrl}
-                        alt={`${verification.id}-ref-normalized`}
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    <img
+                      src={verification.previewRefNormalizedImageUrl}
+                      alt={`${verification.id}-ref-normalized`}
+                      className="h-full w-full object-contain p-4"
+                    />
+                  </div>
+                  <Link
+                    to="/signatures/$id"
+                    params={{ id: verification.signatureId }}
+                    className="text-center hover:underline hover:text-primary transition-colors"
+                  >
+                    Reference Signature
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -294,8 +397,20 @@ function RouteComponent() {
               </div>
             </div>
             <div
-              className={`h-full w-full rounded-md border overflow-hidden bg-white`}
+              className={`relative h-full w-full rounded-md border overflow-hidden bg-white`}
             >
+              <div className="absolute top-3 right-3 flex flex-row items-center gap-2">
+                <Button
+                  className="rounded-full"
+                  size="icon-lg"
+                  variant="secondary"
+                  onClick={() =>
+                    window.open(verification.previewImageUrl, "_blank")
+                  }
+                >
+                  <ExternalLink />
+                </Button>
+              </div>
               <img
                 src={verification.previewImageUrl}
                 alt={`${verification.id}-heatmap`}

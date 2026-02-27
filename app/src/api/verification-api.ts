@@ -1,15 +1,19 @@
 import { apiClient } from "@/lib/api-client";
-import type { Signature, Verification, VerificationStatus } from "@/lib/types";
+import type {
+  Document,
+  Signature,
+  Verification,
+  VerificationStatus,
+} from "@/lib/types";
 
 export const getAllVerifications = async () => {
   return await apiClient<Verification[]>("/verifications", { method: "GET" });
 };
 
 export const getVerificationById = async (id: string) => {
-  return await apiClient<Verification & { signature: Signature }>(
-    `/verifications/${id}`,
-    { method: "GET" },
-  );
+  return await apiClient<
+    Verification & { signature: Signature; document: Document }
+  >(`/verifications/${id}`, { method: "GET" });
 };
 
 export const updateVerificationStatus = async (

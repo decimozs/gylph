@@ -5,6 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Nav from "@/components/nav";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const Route = createFileRoute("/_dashboard/chatbot/")({
   component: RouteComponent,
@@ -43,7 +45,7 @@ function RouteComponent() {
           },
           body: JSON.stringify({
             message,
-            sessionId: "12134511232",
+            sessionId: "123112s",
           }),
         },
       );
@@ -158,9 +160,38 @@ function RouteComponent() {
                 <div className="size-9 flex mt-1 items-center justify-center text-sm font-medium rounded-full bg-primary/80 shrink-0">
                   <Sparkle className="size-5" />
                 </div>
-                <p className="p-4 bg-input/30 rounded-md max-w-125 whitespace-pre-wrap">
-                  {msg.content}
-                </p>
+                <div className="p-4 bg-input/30 rounded-md max-w-125">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      img: ({ ...props }) => (
+                        <img
+                          {...props}
+                          className="rounded-lg max-w-full h-auto my-2 border"
+                        />
+                      ),
+                      h1: ({ children }) => (
+                        <p className="font-bold">{children}</p>
+                      ),
+                      h2: ({ children }) => (
+                        <p className="font-bold">{children}</p>
+                      ),
+                      h3: ({ children }) => (
+                        <p className="font-bold">{children}</p>
+                      ),
+                      a: ({ ...props }) => (
+                        <a
+                          {...props}
+                          className="text-primary underline hover:opacity-80"
+                          target="_blank"
+                          rel="noreferrer"
+                        />
+                      ),
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
               </div>
             ),
           )}

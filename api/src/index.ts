@@ -59,6 +59,7 @@ const app = new Hono({ strict: false })
       where: (table, { eq }) => eq(table.id, id),
       with: {
         signature: true,
+        document: true,
       },
     });
 

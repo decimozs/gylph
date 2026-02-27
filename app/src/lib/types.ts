@@ -31,7 +31,6 @@ export interface Verification {
   id: string;
   signatureId: string;
   queryImageUrl: string;
-
   no: string;
   isAuthentic: boolean;
   similarityScore: number;
@@ -48,6 +47,7 @@ export interface Document {
   signatureId: string;
   verificationId: string;
   no: string;
+  markdown: string;
   url: string;
   previewImageUrl: string;
   name: string;

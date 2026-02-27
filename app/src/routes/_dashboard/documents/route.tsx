@@ -166,7 +166,14 @@ function RouteComponent() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <p>Verification Id</p>
+                    <Link
+                      to="/verifications/$id"
+                      className="w-fit hover:underline hover:text-primary transition-colors"
+                      params={{ id: metadata?.verificationId || "" }}
+                    >
+                      Verification Id
+                    </Link>
+
                     <div
                       onClick={() =>
                         handleCopyId(metadata?.verificationId || "")

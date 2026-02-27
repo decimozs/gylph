@@ -22,7 +22,9 @@ export default function DocumentKanbanBoard({
   const needReviewSignatures = data.filter(
     (i) => i.verifications.status === "needs-review",
   ).length;
-  const forgedSignatures = data.filter((i) => i.verifications.status === "forged").length;
+  const forgedSignatures = data.filter(
+    (i) => i.verifications.status === "forged",
+  ).length;
 
   return (
     <>
@@ -53,6 +55,7 @@ export default function DocumentKanbanBoard({
                         params={{ id: item.id }}
                         key={item.id}
                         draggable
+                        preload="viewport"
                         onDragStart={(e) => {
                           e.dataTransfer.setData("documentId", item.id);
                           e.dataTransfer.effectAllowed = "move";

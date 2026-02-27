@@ -20,16 +20,16 @@ export const verifications = pgTable("verifications", {
   previewRefNormalizedImageUrl: text("preview_ref_normalized_image_url"),
 });
 
-export const verificationsRelations = relations(
-  verifications,
-  ({ one, many }) => ({
-    signature: one(signatures, {
-      fields: [verifications.signatureId],
-      references: [signatures.id],
-    }),
-    documents: many(documents),
+export const verificationsRelations = relations(verifications, ({ one }) => ({
+  signature: one(signatures, {
+    fields: [verifications.signatureId],
+    references: [signatures.id],
   }),
-);
+  document: one(documents, {
+    fields: [verifications.id],
+    references: [documents.verificationId],
+  }),
+}));
 
 export const InsertVerificationSchema = createInsertSchema(verifications)
   .omit(excludedFields)

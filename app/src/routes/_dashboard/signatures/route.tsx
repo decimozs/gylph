@@ -116,6 +116,7 @@ function RouteComponent() {
                     to="/signatures/$id"
                     params={{ id: item.id }}
                     key={item.id}
+                    preload="viewport"
                     className={`rounded-md overflow-hidden bg-white group relative ${activeId === item.id ? "border-2 border-primary" : ""}`}
                   >
                     <img

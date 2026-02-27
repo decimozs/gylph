@@ -10,6 +10,7 @@ export const documents = pgTable("documents", {
   url: text("url").notNull(),
   previewImageUrl: text("preview_image_url"),
   status: text("status"),
+  markdown: text("markdown"),
   signatureId: text("signature_id").references(() => signatures.id, {
     onDelete: "cascade",
   }),

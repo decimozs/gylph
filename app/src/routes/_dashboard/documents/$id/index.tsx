@@ -1,9 +1,13 @@
+import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { documentQueries } from "@/hooks/use-document";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const Route = createFileRoute("/_dashboard/documents/$id/")({
   loader: async ({ context, params }) => {
@@ -11,8 +15,8 @@ export const Route = createFileRoute("/_dashboard/documents/$id/")({
       documentQueries.getById(params.id),
     );
   },
-
   component: RouteComponent,
+  pendingComponent: Loader,
 });
 
 function RouteComponent() {
@@ -74,22 +78,30 @@ function RouteComponent() {
             variant={imageType === "markdown" ? "default" : "outline"}
             onClick={() => handleImageTab("markdown")}
           >
-            Markdown
+            Extraction
           </Button>
         </div>
-        <div className="flex flex-row items-center gap-2">
-          <Button
-            className="rounded-full"
-            size="icon-lg"
-            variant="secondary"
-            onClick={() => window.open(currentImageUrl, "_blank")}
-          >
-            <ExternalLink />
-          </Button>
-        </div>
+        {imageType !== "markdown" && (
+          <div className="flex flex-row items-center gap-2">
+            <Button
+              className="rounded-full"
+              size="icon-lg"
+              variant="secondary"
+              onClick={() => window.open(currentImageUrl, "_blank")}
+            >
+              <ExternalLink />
+            </Button>
+          </div>
+        )}
       </div>
       <div className="flex-1 overflow-hidden rounded-md">
-        {isPDF ? (
+        {imageType === "markdown" ? (
+          <ScrollArea className="h-full w-full p-6 text-left prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {document.markdown || "*No markdown content available*"}
+            </ReactMarkdown>
+          </ScrollArea>
+        ) : isPDF ? (
           <iframe
             src={`${currentImageUrl}#toolbar=0&navpanes=0`}
             className="h-full w-full pointer-events-none rounded-md"
