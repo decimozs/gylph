@@ -114,6 +114,8 @@ function Index() {
     accept: {
       "image/*": [".jpeg", ".jpg", ".png"],
       "application/pdf": [".pdf"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
     },
     multiple: false,
   });
