@@ -76,15 +76,15 @@ export default function DocumentKanbanBoard({
                           <div className="mb-3 h-40 w-full overflow-hidden rounded border bg-muted/50">
                             {isPDF ? (
                               <iframe
-                                src={`${item.previewImageUrl}#toolbar=0&navpanes=0`}
+                                src={`${item.url}#toolbar=0&navpanes=0`}
                                 className="h-full w-full pointer-events-none"
                                 title={item.name}
                               />
                             ) : (
                               <img
-                                src={item.previewImageUrl}
+                                src={item.url}
                                 alt={item.name}
-                                className="h-full w-[300px] object-contain"
+                                className="h-full w-full object-cover object-top"
                               />
                             )}
                           </div>
@@ -167,15 +167,15 @@ export default function DocumentKanbanBoard({
                           <div className="mb-3 h-40 w-full overflow-hidden rounded border bg-muted/50">
                             {isPDF ? (
                               <iframe
-                                src={`${item.previewImageUrl}#toolbar=0&navpanes=0`}
+                                src={`${item.url}#toolbar=0&navpanes=0`}
                                 className="h-full w-full pointer-events-none"
                                 title={item.name}
                               />
                             ) : (
                               <img
-                                src={item.previewImageUrl}
+                                src={item.url}
                                 alt={item.name}
-                                className="h-full w-[300px] object-contain"
+                                className="h-full w-full object-cover object-top"
                               />
                             )}
                           </div>
@@ -244,7 +244,7 @@ export default function DocumentKanbanBoard({
                       >
                         <div
                           key={item.id}
-                          className="p-4 hover:bg-muted cursor-pointer rounded-md border bg-card transition-colors shrink-0"
+                          className="p-4 min-w-full hover:bg-muted cursor-pointer rounded-md border bg-card transition-colors shrink-0"
                         >
                           <div className="relative">
                             <p className="absolute top-3 left-3 size-12 flex items-center justify-center text-sm font-medium rounded-full bg-primary/80 shrink-0">
@@ -257,15 +257,15 @@ export default function DocumentKanbanBoard({
                           <div className="mb-3 h-40 w-full overflow-hidden rounded border bg-muted/50">
                             {isPDF ? (
                               <iframe
-                                src={`${item.previewImageUrl}#toolbar=0&navpanes=0`}
+                                src={`${item.url}#toolbar=0&navpanes=0`}
                                 className="h-full w-full pointer-events-none"
                                 title={item.name}
                               />
                             ) : (
                               <img
-                                src={item.previewImageUrl}
+                                src={item.url}
                                 alt={item.name}
-                                className="h-full w-[300px] object-contain"
+                                className="h-full w-full object-cover object-top"
                               />
                             )}
                           </div>

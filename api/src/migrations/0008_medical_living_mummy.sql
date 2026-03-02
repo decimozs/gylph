@@ -1,1 +1,0 @@
-ALTER TABLE "signatures" ADD COLUMN "email" text;

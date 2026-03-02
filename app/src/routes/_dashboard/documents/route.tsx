@@ -8,12 +8,11 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Check,
-  CircleAlert,
   Copy,
   Eclipse,
   FilePlusCorner,
+  FolderTree,
   Search,
-  Send,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useQueryState } from "nuqs";
@@ -26,6 +25,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { toast } from "sonner";
 import ActionsButton from "@/components/actions-button";
+import Evaluation from "@/components/evaluation";
 
 export const Route = createFileRoute("/_dashboard/documents")({
   loader: async ({ context }) => {
@@ -52,6 +52,10 @@ function RouteComponent() {
     shallow: false,
     clearOnDefault: true,
     throttleMs: 2000,
+  });
+  const [mode, setMode] = useQueryState("mode", {
+    defaultValue: "",
+    clearOnDefault: true,
   });
   const match = useMatch({
     from: "/_dashboard/documents/$id/",
@@ -115,32 +119,27 @@ function RouteComponent() {
           {activeId && (
             <>
               <Separator />
-              {metadata?.verifications.status === "needs-review" && (
-                <>
-                  <ActionsButton
-                    props={{
-                      icon: Send,
-                      label: "Send Review",
-                    }}
-                  />
-                  <Separator />
-                </>
-              )}
-              {metadata?.verifications.status === "forged" && (
-                <>
-                  <ActionsButton
-                    props={{
-                      icon: CircleAlert,
-                      label: "Report",
-                      variant: "destructive",
-                    }}
-                  />
-                  <Separator />
-                </>
-              )}
-
+              <>
+                <ActionsButton
+                  props={{
+                    icon: mode === "evaluation" ? FolderTree : FilePlusCorner,
+                    label:
+                      mode === "evaluation"
+                        ? "Back to folder tree"
+                        : "Evaluation",
+                    onClick: () => {
+                      if (mode === "evaluation") {
+                        setMode(null);
+                      } else {
+                        setMode("evaluation");
+                      }
+                    },
+                  }}
+                />
+                <Separator />
+              </>
               <ScrollArea className="bg-muted/30 rounded-md h-full p-4 overflow-y-auto px-6">
-                <div className="flex flex-col gap-4 overflow-y-auto">
+                <div className="flex flex-col gap-4 overflow-y-auto h-full">
                   <p className="text-2xl">
                     Document #{metadata?.no}{" "}
                     <span className="text-primary">
@@ -249,9 +248,12 @@ function RouteComponent() {
             </>
           )}
         </div>
-        <div className="grid grid-cols-[1fr_22%_22%_22%] gap-4 h-full max-h-screen overflow-hidden">
+        <div
+          className={`grid ${!mode ? "grid-cols-[1fr_22%_22%_22%]" : "grid-cols-[40%_1fr]"} gap-4 h-full max-h-screen overflow-hidden`}
+        >
           <Outlet />
-          <DocumentKanbanBoard data={filteredData} />
+          {mode === "evaluation" && <Evaluation data={metadata} />}
+          {!mode && <DocumentKanbanBoard data={filteredData} />}
         </div>
       </div>
     </div>

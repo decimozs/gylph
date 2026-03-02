@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/lib/types";
 import { verificationQueries } from "@/hooks/use-verification";
+import { documentQueries } from "@/hooks/use-document";
 
 export const Route = createFileRoute("/extract/")({
   component: Index,
@@ -59,11 +60,11 @@ function Index() {
       formData.append("document_name", finalName);
       formData.append("document_file", value.documentFile);
 
-      const toastId = toast.loading("Extracting signatures...");
+      const toastId = toast.loading("Extracting data from the documents...");
 
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_N8N_BASE_URL}/signatures/extract`,
+          `${import.meta.env.VITE_N8N_BASE_URL}/documents/extract`,
           {
             method: "POST",
             body: formData,
@@ -71,16 +72,17 @@ function Index() {
         );
 
         if (res.ok) {
-          const data: ApiResponse<{ verificationId: string }> =
-            await res.json();
-          toast.success("Signatures extracted successfully!", { id: toastId });
+          const data: ApiResponse<{ documentId: string }> = await res.json();
+          toast.success("Document extracted successfully!", { id: toastId });
           queryClient.invalidateQueries(verificationQueries.getAll());
+          queryClient.invalidateQueries(documentQueries.getAll());
           navigate({
-            to: "/verifications/$id",
-            params: { id: data.data.verificationId },
+            to: "/documents/$id",
+            search: { mode: "evaluation" },
+            params: { id: data.data.documentId },
           });
         } else {
-          toast.error("Failed to extract signatures. Please try again.");
+          toast.error("Failed to extract document. Please try again.");
         }
       } catch (error) {
         console.error("Upload error:", error);

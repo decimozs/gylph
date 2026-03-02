@@ -99,9 +99,10 @@ async def verify_signature(
             status = "authentic"
         elif similarity_score >= 0.70:
             is_authentic = False
-            status = "uncertain (requires manual review)"
+            status = "needs-review"
         elif similarity_score == 0:
-            status = "rejected (no matching features)"
+            is_authentic = False
+            status = "forged"
 
         overlap_viz = analyzer.get_overlap_viz(ref_data["siamese"], aligned_live)
 

@@ -120,6 +120,9 @@ function RouteComponent() {
             </div>
           </div>
         </div>
+        <p className="text-muted-foreground text-sm">
+          AI can make mistakes. Please double check the info.
+        </p>
       </div>
     );
   }

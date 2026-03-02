@@ -40,6 +40,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Loader from "@/components/loader";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import remarkBreaks from "remark-breaks";
 
 export const Route = createFileRoute("/_dashboard/verifications/$id/")({
   loader: async ({ context, params }) => {
@@ -67,7 +76,11 @@ function RouteComponent() {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   const [imageType, setImageType] = useState<
-    "original" | "processed" | "markdown"
+    | "original"
+    | "text-extraction"
+    | "signature-extraction"
+    | "text"
+    | "markdown"
   >("original");
 
   const handleCopyId = async () => {
@@ -103,13 +116,21 @@ function RouteComponent() {
   };
 
   const currentImageUrl =
-    (imageType === "original"
-      ? verification?.document?.url
-      : verification?.document?.previewImageUrl) || "";
+    imageType === "original"
+      ? verification.document.url
+      : imageType === "text-extraction"
+        ? verification.document.textExtractionImageUrl
+        : verification.document.signatureExtractionImageUrl;
 
   const isPDF = currentImageUrl.toLowerCase().endsWith(".pdf");
-  const handleImageTab = (tab: "original" | "processed" | "markdown") =>
-    setImageType(tab);
+  const handleImageTab = (
+    tab:
+      | "original"
+      | "text-extraction"
+      | "signature-extraction"
+      | "markdown"
+      | "text",
+  ) => setImageType(tab);
 
   return (
     <div
@@ -199,32 +220,29 @@ function RouteComponent() {
                 <div className="px-6 flex flex-col gap-4">
                   <Separator />
                   <div className="flex flex-row items-center justify-between">
-                    <div className="flex flex-row items-center gap-2">
-                      <Button
-                        variant={
-                          imageType === "original" ? "default" : "outline"
-                        }
-                        onClick={() => handleImageTab("original")}
-                      >
-                        Original
-                      </Button>
-                      <Button
-                        variant={
-                          imageType === "processed" ? "default" : "outline"
-                        }
-                        onClick={() => handleImageTab("processed")}
-                      >
-                        Processed
-                      </Button>
-                      <Button
-                        variant={
-                          imageType === "markdown" ? "default" : "outline"
-                        }
-                        onClick={() => handleImageTab("markdown")}
-                      >
-                        Extraction
-                      </Button>
-                    </div>
+                    <Select
+                      value={imageType}
+                      onValueChange={(value) =>
+                        handleImageTab(value as typeof imageType)
+                      }
+                    >
+                      <SelectTrigger className="w-50">
+                        <SelectValue placeholder="Select view type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="original">Original</SelectItem>
+                          <SelectItem value="text-extraction">
+                            Text Extraction
+                          </SelectItem>
+                          <SelectItem value="signature-extraction">
+                            Signature Extraction
+                          </SelectItem>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="markdown">Markdown</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                     {imageType !== "markdown" && (
                       <div className="flex flex-row items-center gap-2">
                         <Button
@@ -240,8 +258,10 @@ function RouteComponent() {
                   </div>
                   <div className="flex-1 overflow-hidden rounded-md">
                     {imageType === "markdown" ? (
-                      <ScrollArea className="h-full w-full p-6 text-left prose prose-sm dark:prose-invert max-w-none border border-dashed">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      <ScrollArea className="h-full w-full p-6 text-left prose prose-sm prose-p:my-4 dark:prose-invert max-w-none border border-dashed">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                        >
                           {verification.document.markdown ||
                             "*No markdown content available*"}
                         </ReactMarkdown>
@@ -252,6 +272,15 @@ function RouteComponent() {
                         className="h-full w-full pointer-events-none rounded-md"
                         title={verification.document.name}
                       />
+                    ) : imageType === "text" ? (
+                      <ScrollArea className="h-full w-full p-6 text-left prose prose-sm prose-p:my-4 dark:prose-invert max-w-none border border-dashed">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                        >
+                          {verification.document.text ||
+                            "*No raw text available*"}
+                        </ReactMarkdown>
+                      </ScrollArea>
                     ) : (
                       <img
                         src={currentImageUrl}
@@ -265,10 +294,11 @@ function RouteComponent() {
                   <Link
                     to="/documents/$id"
                     params={{ id: verification.document.id }}
+                    search={{ mode: "evaluation" }}
                     preload="intent"
                   >
                     <Button size="lg" variant="secondary" className="w-full">
-                      Go to document
+                      Go to document evaluation
                     </Button>
                   </Link>
                 </SheetFooter>
