@@ -1,6 +1,6 @@
 {
-  "id": "fd52673e-fc2d-4986-8cf3-c11fdb599ee0",
-  "prevId": "ab4c8951-e723-4430-89b4-99df125483d7",
+  "id": "54a5b42d-bef0-4e3c-846c-38a542b987c3",
+  "prevId": "3e2d3b1b-2969-4d70-8fd8-bf9856500807",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -311,12 +311,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "description_score": {
-          "name": "description_score",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": false
-        },
         "final_rank": {
           "name": "final_rank",
           "type": "text",
@@ -332,6 +326,54 @@
         "analysis_summary": {
           "name": "analysis_summary",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "language_note": {
+          "name": "language_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "protocol_note": {
+          "name": "protocol_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linguistic_note": {
+          "name": "linguistic_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "overview": {
+          "name": "overview",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "medical_language_score": {
+          "name": "medical_language_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "protocol_score": {
+          "name": "protocol_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linguistic_score": {
+          "name": "linguistic_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "severity_score": {
+          "name": "severity_score",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": false
         },
@@ -366,6 +408,127 @@
         "documents_verification_id_verifications_id_fk": {
           "name": "documents_verification_id_verifications_id_fk",
           "tableFrom": "documents",
+          "tableTo": "verifications",
+          "columnsFrom": [
+            "verification_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.overall_scores": {
+      "name": "overall_scores",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "no": {
+          "name": "no",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "score": {
+          "name": "score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_id": {
+          "name": "verification_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verdict": {
+          "name": "verdict",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "signature_fraud_score": {
+          "name": "signature_fraud_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description_fraud_score": {
+          "name": "description_fraud_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "final_rank": {
+          "name": "final_rank",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "suspicion_type": {
+          "name": "suspicion_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_flagged_for_review": {
+          "name": "is_flagged_for_review",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "overall_scores_document_id_documents_id_fk": {
+          "name": "overall_scores_document_id_documents_id_fk",
+          "tableFrom": "overall_scores",
+          "tableTo": "documents",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "overall_scores_verification_id_verifications_id_fk": {
+          "name": "overall_scores_verification_id_verifications_id_fk",
+          "tableFrom": "overall_scores",
           "tableTo": "verifications",
           "columnsFrom": [
             "verification_id"

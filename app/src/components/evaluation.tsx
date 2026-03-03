@@ -1,6 +1,5 @@
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -12,6 +11,7 @@ import type {
   Signature,
   VerificationStatus,
   DocumentFinalRankType,
+  OverallScore,
 } from "@/lib/types";
 import { Separator } from "./ui/separator";
 import VerificationBadge from "./verification-badge";
@@ -30,6 +30,7 @@ import {
   ExternalLink,
   Fullscreen,
   Loader2,
+  X,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -37,14 +38,19 @@ import {
   ReactCompareSliderImage,
 } from "react-compare-slider";
 import { Link } from "@tanstack/react-router";
-import { documentQueries, useGetDocumentById } from "@/hooks/use-document";
+import { documentQueries } from "@/hooks/use-document";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryState } from "nuqs";
 
 function SignatureEvaluation({
   data,
 }: {
   data:
-    | (Document & { signature: Signature; verifications: Verification })
+    | (Document & {
+        signature: Signature;
+        verification: Verification;
+        overall: OverallScore;
+      })
     | undefined;
 }) {
   const [tab, setTab] = useState<"comparison" | "heatmap">("comparison");
@@ -78,7 +84,7 @@ function SignatureEvaluation({
         <div className="flex flex-row items-center gap-2">
           <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full">
             <p>
-              {Math.round(Number(data?.verifications.similarityScore) * 100)} %
+              {Math.round(Number(data?.verification.similarityScore) * 100)} %
             </p>
             <p>Confidence</p>
           </div>
@@ -104,7 +110,7 @@ function SignatureEvaluation({
                 className="w-full bg-white rounded-md"
                 itemOne={
                   <ReactCompareSliderImage
-                    src={data?.verifications.previewLiveNormalizedImageUrl}
+                    src={data?.verification.previewLiveNormalizedImageUrl}
                     alt="Query Normalized Signature"
                     style={{
                       objectFit: "contain",
@@ -116,7 +122,7 @@ function SignatureEvaluation({
                 }
                 itemTwo={
                   <ReactCompareSliderImage
-                    src={data?.verifications.previewRefNormalizedImageUrl}
+                    src={data?.verification.previewRefNormalizedImageUrl}
                     alt="Original Normalized Signature"
                     style={{
                       objectFit: "contain",
@@ -141,7 +147,7 @@ function SignatureEvaluation({
                         variant="secondary"
                         onClick={() =>
                           window.open(
-                            data?.verifications.previewLiveNormalizedImageUrl,
+                            data?.verification.previewLiveNormalizedImageUrl,
                             "_blank",
                           )
                         }
@@ -150,8 +156,8 @@ function SignatureEvaluation({
                       </Button>
                     </div>
                     <img
-                      src={data?.verifications.previewLiveNormalizedImageUrl}
-                      alt={`${data?.verifications.id}-live-normalized`}
+                      src={data?.verification.previewLiveNormalizedImageUrl}
+                      alt={`${data?.verification.id}-live-normalized`}
                       className="h-full w-full object-contain p-4"
                     />
                   </div>
@@ -168,7 +174,7 @@ function SignatureEvaluation({
                         variant="secondary"
                         onClick={() =>
                           window.open(
-                            data?.verifications.previewRefNormalizedImageUrl,
+                            data?.verification.previewRefNormalizedImageUrl,
                             "_blank",
                           )
                         }
@@ -177,14 +183,14 @@ function SignatureEvaluation({
                       </Button>
                     </div>
                     <img
-                      src={data?.verifications.previewRefNormalizedImageUrl}
-                      alt={`${data?.verifications.id}-ref-normalized`}
+                      src={data?.verification.previewRefNormalizedImageUrl}
+                      alt={`${data?.verification.id}-ref-normalized`}
                       className="h-full w-full object-contain p-4"
                     />
                   </div>
                   <Link
                     to="/signatures/$id"
-                    params={{ id: data?.verifications.signatureId || "" }}
+                    params={{ id: data?.verification.signatureId || "" }}
                     className="text-center hover:underline hover:text-primary transition-colors"
                   >
                     Reference Signature
@@ -212,15 +218,15 @@ function SignatureEvaluation({
                   size="icon-lg"
                   variant="secondary"
                   onClick={() =>
-                    window.open(data?.verifications.previewImageUrl, "_blank")
+                    window.open(data?.verification.previewImageUrl, "_blank")
                   }
                 >
                   <ExternalLink />
                 </Button>
               </div>
               <img
-                src={data?.verifications.previewImageUrl}
-                alt={`${data?.verifications.id}-heatmap`}
+                src={data?.verification.previewImageUrl}
+                alt={`${data?.verification.id}-heatmap`}
                 className="h-full w-full object-contain py-8"
               />
             </div>
@@ -237,7 +243,7 @@ function SignatureEvaluation({
                 <span className="block bg-green-500 rounded-md size-5"></span>
                 <Link
                   to="/signatures/$id"
-                  params={{ id: data?.verifications.signatureId || "" }}
+                  params={{ id: data?.verification.signatureId || "" }}
                   className="hover:underline hover:text-primary transition-colors"
                 >
                   Reference Signature
@@ -250,11 +256,16 @@ function SignatureEvaluation({
     </div>
   );
 }
+
 function DocumentEvaluation({
   data,
 }: {
   data:
-    | (Document & { signature: Signature; verifications: Verification })
+    | (Document & {
+        signature: Signature;
+        verification: Verification;
+        overall: OverallScore;
+      })
     | undefined;
 }) {
   return (
@@ -359,11 +370,117 @@ function DocumentEvaluation({
   );
 }
 
+function OverallEvaluation({
+  data,
+}: {
+  data:
+    | (Document & {
+        signature: Signature;
+        verification: Verification;
+        overall: OverallScore;
+      })
+    | undefined;
+}) {
+  return (
+    <div className="flex flex-col gap-4 h-full">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row items-center justify-between">
+          <p className="text-2xl">Note</p>
+          <div className="flex flex-row items-center gap-2">
+            {data?.suspicionType.toLowerCase() !== "none" && (
+              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full capitalize bg-red-500/30">
+                <p>{data?.suspicionType.replaceAll("-", " ")}</p>
+              </div>
+            )}
+            {data?.overall.suspicionType.toLowerCase() !== "none" && (
+              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full capitalize bg-red-500/30">
+                <p>{data?.overall.suspicionType.replaceAll("-", " ")}</p>
+              </div>
+            )}
+            <div
+              className={`flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full ${
+                Number(data?.overall?.score) > 0.7
+                  ? "bg-red-500/30"
+                  : "bg-blue-500/30"
+              }`}
+            >
+              <p>Document</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-2xl p-4 bg-primary/30 rounded-md">
+          {data?.overall.verdict}
+        </p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="relative">
+            <ReactCompareSlider
+              key={data?.id}
+              className="w-full bg-white rounded-md"
+              itemOne={
+                <ReactCompareSliderImage
+                  src={data?.verification.previewLiveNormalizedImageUrl}
+                  alt="Query Normalized Signature"
+                  style={{
+                    objectFit: "contain",
+                    width: "100%",
+                    height: "100%",
+                    padding: "2rem",
+                  }}
+                />
+              }
+              itemTwo={
+                <ReactCompareSliderImage
+                  src={data?.verification.previewRefNormalizedImageUrl}
+                  alt="Original Normalized Signature"
+                  style={{
+                    objectFit: "contain",
+                    width: "100%",
+                    height: "100%",
+                    padding: "2rem",
+                  }}
+                />
+              }
+              style={{ width: "100%", height: "100%" }}
+            />
+            <div className="absolute bottom-4 left-4">
+              <p className="text-2xl text-primary-foreground">Comparison</p>
+            </div>
+          </div>
+          <div className="relative">
+            <img
+              src={data?.verification.previewImageUrl}
+              alt={`${data?.verification.id}-heatmap`}
+              className="h-full w-full object-contain rounded-md"
+            />
+            <div className="absolute bottom-4 left-4">
+              <p className="text-2xl text-primary-foreground">Heatmap</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row items-center justify-between">
+            <p className="text-2xl">Document Analysis</p>
+          </div>
+          <p className="text-2xl p-4 bg-primary/30 rounded-md">
+            {data?.overview}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Evaluation({
   data: initialData,
 }: {
   data:
-    | (Document & { signature: Signature; verifications: Verification })
+    | (Document & {
+        signature: Signature;
+        verification: Verification;
+        overall: OverallScore;
+      })
     | undefined;
 }) {
   const { data: polledData } = useQuery({
@@ -372,20 +489,21 @@ export default function Evaluation({
       query.state.data?.status === "processing" ? 5000 : false,
     placeholderData: (prev) => prev,
   });
+  const [, setMode] = useQueryState("mode");
 
   const data = polledData || initialData;
 
   const [evaluationType, setEvaluationType] = useState<
-    "signature-evaluation" | "document-evaluation"
-  >("signature-evaluation");
+    "signature-evaluation" | "document-evaluation" | "overall-evaluation"
+  >("overall-evaluation");
 
   const handleEvaluationTab = (
-    tab: "signature-evaluation" | "document-evaluation",
+    tab: "signature-evaluation" | "document-evaluation" | "overall-evaluation",
   ) => setEvaluationType(tab);
 
   if (data?.status === "processing") {
     return (
-      <div className="border rounded-md flex flex-col w-full min-h-0 bg-background flex items-center justify-center">
+      <div className="border rounded-md flex flex-col w-full min-h-0 bg-background items-center justify-center">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -409,13 +527,13 @@ export default function Evaluation({
             {evaluationType === "signature-evaluation" && (
               <>
                 <VerificationBadge
-                  status={data?.verifications.status as VerificationStatus}
+                  status={data?.verification.status as VerificationStatus}
                 />
 
                 <p className="text-2xl tracking-tight">
-                  {data?.verifications.status === "authentic"
+                  {data?.verification.status === "authentic"
                     ? "Signature Verified"
-                    : data?.verifications.status === "needs-review"
+                    : data?.verification.status === "needs-review"
                       ? "Signature In Review"
                       : "Forged Signature"}
                 </p>
@@ -435,31 +553,60 @@ export default function Evaluation({
                 </p>
               </>
             )}
+            {evaluationType === "overall-evaluation" && (
+              <>
+                <VerificationBadge
+                  status={data?.finalRank as DocumentFinalRankType}
+                />
+                <p className="text-2xl tracking-tight">
+                  {data?.finalRank.toLowerCase() === "low"
+                    ? "Low Risk"
+                    : data?.finalRank === "moderate"
+                      ? "Moderate Risk"
+                      : "Highly Suspicious"}
+                </p>
+              </>
+            )}
           </div>
         </div>
-        <Select
-          value={evaluationType}
-          onValueChange={(value) =>
-            handleEvaluationTab(value as typeof evaluationType)
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select evaluation type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="signature-evaluation">
-                Signature Evaluation
-              </SelectItem>
-              <SelectItem value="document-evaluation">
-                Document Evaluation
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-row items-center gap-2">
+          <Select
+            value={evaluationType}
+            onValueChange={(value) =>
+              handleEvaluationTab(value as typeof evaluationType)
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select evaluation type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="overall-evaluation">
+                  Overall Evaluation
+                </SelectItem>
+                <SelectItem value="signature-evaluation">
+                  Signature Evaluation
+                </SelectItem>
+                <SelectItem value="document-evaluation">
+                  Document Evaluation
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon-lg"
+            onClick={() => setMode(null)}
+          >
+            <X />
+          </Button>
+        </div>
       </div>
       <Separator />
       <div className="p-4 flex flex-col gap-4 h-full">
+        {evaluationType === "overall-evaluation" && (
+          <OverallEvaluation data={data} />
+        )}
         {evaluationType === "signature-evaluation" && (
           <SignatureEvaluation data={data} />
         )}

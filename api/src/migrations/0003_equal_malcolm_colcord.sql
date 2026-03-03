@@ -1,0 +1,1 @@
+ALTER TABLE "overall_scores" ADD COLUMN "score" double precision NOT NULL;

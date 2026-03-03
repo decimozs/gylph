@@ -1,5 +1,5 @@
 {
-  "id": "6faabf89-0a7f-49f2-a333-7a88859bfa2a",
+  "id": "d5909f52-0bd1-4c63-878d-957324617e08",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -281,8 +281,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "preview_image_url": {
-          "name": "preview_image_url",
+        "text_extraction_image_url": {
+          "name": "text_extraction_image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "signature_extraction_image_url": {
+          "name": "signature_extraction_image_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -293,9 +299,81 @@
           "primaryKey": false,
           "notNull": false
         },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "markdown": {
           "name": "markdown",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "final_rank": {
+          "name": "final_rank",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "suspicion_type": {
+          "name": "suspicion_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "analysis_summary": {
+          "name": "analysis_summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "language_note": {
+          "name": "language_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "protocol_note": {
+          "name": "protocol_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linguistic_note": {
+          "name": "linguistic_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "overview": {
+          "name": "overview",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "medical_language_score": {
+          "name": "medical_language_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "protocol_score": {
+          "name": "protocol_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linguistic_score": {
+          "name": "linguistic_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "severity_score": {
+          "name": "severity_score",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": false
         },

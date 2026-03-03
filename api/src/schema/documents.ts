@@ -3,6 +3,7 @@ import { relations } from "drizzle-orm";
 import { baseSchema } from "@/utils";
 import { signatures } from "./signatures";
 import { verifications } from "./verifications";
+import { overallScores } from "./overall";
 
 export const documents = pgTable("documents", {
   ...baseSchema,
@@ -37,8 +38,12 @@ export const documentsRelations = relations(documents, ({ one }) => ({
     fields: [documents.signatureId],
     references: [signatures.id],
   }),
-  verifications: one(verifications, {
+  verification: one(verifications, {
     fields: [documents.verificationId],
     references: [verifications.id],
+  }),
+  overall: one(overallScores, {
+    fields: [documents.id],
+    references: [overallScores.documentId],
   }),
 }));

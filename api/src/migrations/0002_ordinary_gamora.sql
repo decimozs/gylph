@@ -1,0 +1,1 @@
+ALTER TABLE "overall_scores" ADD COLUMN "verdict" text NOT NULL;

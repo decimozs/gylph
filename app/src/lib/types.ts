@@ -83,4 +83,27 @@ export interface Document {
   overview: string;
 }
 
+export interface OverallScore {
+  id: string;
+  score: number;
+  documentId: string | null;
+  verificationId: string | null;
+  verdict: string;
+  signatureFraudScore: number;
+  descriptionFraudScore: number;
+  finalRank: DocumentFinalRankType;
+  suspicionType:
+    | "signature"
+    | "description"
+    | "both"
+    | "none"
+    | "medical-jargon"
+    | "untrained-writing"
+    | "billing-anomaly"
+    | "protocol-deviation";
+  isFlaggedForReview: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type VerificationStatus = "authentic" | "forged" | "needs-review";

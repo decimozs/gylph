@@ -88,7 +88,8 @@ const app = new Hono({ strict: false })
   .get("/documents", async (c) => {
     const data = await db.query.documents.findMany({
       with: {
-        verifications: true,
+        verification: true,
+        overall: true,
       },
       orderBy: (sig, { desc }) => [desc(sig.createdAt)],
     });
@@ -100,7 +101,8 @@ const app = new Hono({ strict: false })
       where: (table, { eq }) => eq(table.id, id),
       with: {
         signature: true,
-        verifications: true,
+        verification: true,
+        overall: true,
       },
     });
 

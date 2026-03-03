@@ -143,7 +143,7 @@ function RouteComponent() {
           </ScrollArea>
         ) : (
           <img
-            src={currentImageUrl}
+            src={currentImageUrl || ""}
             alt={document.name}
             className="h-full w-full object-contain rounded-md"
           />

@@ -1,1 +1,0 @@
-ALTER TABLE "documents" ADD COLUMN "text" text;

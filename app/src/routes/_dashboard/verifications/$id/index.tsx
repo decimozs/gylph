@@ -115,14 +115,15 @@ function RouteComponent() {
     }
   };
 
-  const currentImageUrl =
-    imageType === "original"
-      ? verification.document.url
+  const currentImageUrl = verification.document
+    ? imageType === "original"
+      ? (verification.document.url as string)
       : imageType === "text-extraction"
-        ? verification.document.textExtractionImageUrl
-        : verification.document.signatureExtractionImageUrl;
+        ? (verification.document.textExtractionImageUrl as string)
+        : (verification.document.signatureExtractionImageUrl as string)
+    : "";
 
-  const isPDF = currentImageUrl.toLowerCase().endsWith(".pdf");
+  const isPDF = currentImageUrl?.toLowerCase().endsWith(".pdf");
   const handleImageTab = (
     tab:
       | "original"

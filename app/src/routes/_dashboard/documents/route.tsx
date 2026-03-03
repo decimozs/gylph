@@ -13,6 +13,7 @@ import {
   FilePlusCorner,
   FolderTree,
   Search,
+  Send,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useQueryState } from "nuqs";
@@ -122,10 +123,15 @@ function RouteComponent() {
               <>
                 <ActionsButton
                   props={{
-                    icon: mode === "evaluation" ? FolderTree : FilePlusCorner,
+                    icon:
+                      mode === "evaluation" &&
+                      metadata?.overall.isFlaggedForReview === true
+                        ? Send
+                        : FilePlusCorner,
                     label:
-                      mode === "evaluation"
-                        ? "Back to folder tree"
+                      mode === "evaluation" &&
+                      metadata?.overall.isFlaggedForReview === true
+                        ? "Send Review"
                         : "Evaluation",
                     onClick: () => {
                       if (mode === "evaluation") {

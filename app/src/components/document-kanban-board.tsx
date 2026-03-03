@@ -8,22 +8,22 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import type { Verification, Document } from "@/lib/types";
+import type { Verification, Document, OverallScore } from "@/lib/types";
 import { Link } from "@tanstack/react-router";
 
 export default function DocumentKanbanBoard({
   data,
 }: {
-  data: (Document & { verifications: Verification })[];
+  data: (Document & { verification: Verification; overall: OverallScore })[];
 }) {
   const authenticSignatures = data.filter(
-    (i) => i.verifications.status === "authentic",
+    (i) => i.verification.status === "authentic",
   ).length;
   const needReviewSignatures = data.filter(
-    (i) => i.verifications.status === "needs-review",
+    (i) => i.verification.status === "needs-review",
   ).length;
   const forgedSignatures = data.filter(
-    (i) => i.verifications.status === "forged",
+    (i) => i.verification.status === "forged",
   ).length;
 
   return (
@@ -40,7 +40,7 @@ export default function DocumentKanbanBoard({
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.verifications.status === "authentic",
+            (item) => item.verification.status === "authentic",
           );
 
           if (filteredData.length > 0) {
@@ -67,10 +67,7 @@ export default function DocumentKanbanBoard({
                         >
                           <div className="relative">
                             <p className="absolute top-3 left-3 size-12 flex items-center justify-center text-sm font-medium rounded-full bg-primary/80 shrink-0">
-                              {Math.round(
-                                item.verifications.similarityScore * 100,
-                              )}
-                              %
+                              {Math.round((item.overall?.score ?? 0) * 100)} %
                             </p>
                           </div>
                           <div className="mb-3 h-40 w-full overflow-hidden rounded border bg-muted/50">
@@ -88,7 +85,7 @@ export default function DocumentKanbanBoard({
                               />
                             )}
                           </div>
-                          <p className="font-medium truncate max-w-[300px] text-sm">
+                          <p className="font-medium truncate max-w-75 text-sm">
                             {item.name}
                           </p>
                         </div>
@@ -131,7 +128,7 @@ export default function DocumentKanbanBoard({
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.verifications.status === "needs-review",
+            (item) => item.verification.status === "needs-review",
           );
 
           if (filteredData.length > 0) {
@@ -157,10 +154,7 @@ export default function DocumentKanbanBoard({
                         >
                           <div className="relative">
                             <p className="absolute top-3 left-3 size-12 flex items-center justify-center text-sm font-medium rounded-full bg-primary/80 shrink-0">
-                              {Math.round(
-                                item.verifications.similarityScore * 100,
-                              )}
-                              %
+                              {Math.round((item.overall?.score ?? 0) * 100)} %
                             </p>
                           </div>
 
@@ -179,7 +173,7 @@ export default function DocumentKanbanBoard({
                               />
                             )}
                           </div>
-                          <p className="font-medium truncate max-w-[300px] text-sm">
+                          <p className="font-medium truncate max-w-75 text-sm">
                             {item.name}
                           </p>
                         </div>
@@ -222,7 +216,7 @@ export default function DocumentKanbanBoard({
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.verifications.status === "forged",
+            (item) => item.verification.status === "forged",
           );
 
           if (filteredData.length > 0) {
@@ -248,10 +242,7 @@ export default function DocumentKanbanBoard({
                         >
                           <div className="relative">
                             <p className="absolute top-3 left-3 size-12 flex items-center justify-center text-sm font-medium rounded-full bg-primary/80 shrink-0">
-                              {Math.round(
-                                item.verifications.similarityScore * 100,
-                              )}
-                              %
+                              {Math.round((item.overall?.score ?? 0) * 100)} %
                             </p>
                           </div>
                           <div className="mb-3 h-40 w-full overflow-hidden rounded border bg-muted/50">
@@ -269,7 +260,7 @@ export default function DocumentKanbanBoard({
                               />
                             )}
                           </div>
-                          <p className="font-medium truncate max-w-[300px] text-sm">
+                          <p className="font-medium truncate max-w-75 text-sm">
                             {item.name}
                           </p>
                         </div>
