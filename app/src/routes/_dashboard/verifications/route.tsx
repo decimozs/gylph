@@ -99,14 +99,6 @@ function RouteComponent() {
             />
           </div>
           <Separator />
-          <Link to="/verify">
-            <ActionsButton
-              props={{
-                icon: CircleCheck,
-                label: "Verify Signature",
-              }}
-            />
-          </Link>
           <ScrollArea className="bg-muted/30 rounded-md h-full p-4 overflow-y-auto px-6">
             <div className="flex flex-col gap-4 overflow-y-auto">
               {filteredData.length > 0 ? (

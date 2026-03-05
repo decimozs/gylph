@@ -2,6 +2,55 @@ import type { DocumentFinalRankType, VerificationStatus } from "@/lib/types";
 import { BadgeAlert, BadgeCheck, BadgeHelp, HelpCircle } from "lucide-react";
 import type { JSX } from "react";
 
+export function OverallVerificationBadge({
+  status,
+}: {
+  status: DocumentFinalRankType;
+}) {
+  const items: Record<
+    string,
+    { title: string; color: string; icon: JSX.Element }
+  > = {
+    low: {
+      title: "Low Risk",
+      color: "bg-blue-500",
+      icon: <BadgeCheck className="text-white" />,
+    },
+    moderate: {
+      title: "Moderate Risk",
+      color: "bg-orange-500",
+      icon: <BadgeHelp className="text-white" />,
+    },
+    ["highly-suspicious"]: {
+      title: "Highly Suspicious",
+      color: "bg-red-500",
+      icon: <BadgeAlert className="text-white" />,
+    },
+    ["highly suspicious"]: {
+      title: "Highly Suspicious",
+      color: "bg-red-500",
+      icon: <BadgeAlert className="text-white" />,
+    },
+    high: {
+      title: "Highly Suspicious",
+      color: "bg-red-500",
+      icon: <BadgeAlert className="text-white" />,
+    },
+  };
+
+  const config = items[status as string] || {
+    title: "Unknown Status",
+    color: "bg-gray-400",
+    icon: <HelpCircle className="text-white" />,
+  };
+
+  return (
+    <div className={`p-1 rounded-full ${config.color}`} title={config.title}>
+      {config.icon}
+    </div>
+  );
+}
+
 export default function VerificationBadge({
   status,
 }: {

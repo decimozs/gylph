@@ -5,6 +5,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   Verification,
   Document,
@@ -14,7 +19,9 @@ import type {
   OverallScore,
 } from "@/lib/types";
 import { Separator } from "./ui/separator";
-import VerificationBadge from "./verification-badge";
+import VerificationBadge, {
+  OverallVerificationBadge,
+} from "./verification-badge";
 import { useState } from "react";
 import {
   Select,
@@ -29,6 +36,7 @@ import {
   Columns2,
   ExternalLink,
   Fullscreen,
+  Info,
   Loader2,
   X,
 } from "lucide-react";
@@ -41,6 +49,7 @@ import { Link } from "@tanstack/react-router";
 import { documentQueries } from "@/hooks/use-document";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
+import { ScrollArea } from "./ui/scroll-area";
 
 function SignatureEvaluation({
   data,
@@ -82,7 +91,7 @@ function SignatureEvaluation({
           </Button>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full">
+          <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full bg-blue-500/30">
             <p>
               {Math.round(Number(data?.verification.similarityScore) * 100)} %
             </p>
@@ -382,92 +391,104 @@ function OverallEvaluation({
     | undefined;
 }) {
   return (
-    <div className="flex flex-col gap-4 h-full">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-row items-center justify-between">
-          <p className="text-2xl">Note</p>
-          <div className="flex flex-row items-center gap-2">
-            {data?.suspicionType.toLowerCase() !== "none" && (
-              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full capitalize bg-red-500/30">
-                <p>{data?.suspicionType.replaceAll("-", " ")}</p>
-              </div>
-            )}
-            {data?.overall.suspicionType.toLowerCase() !== "none" && (
-              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full capitalize bg-red-500/30">
-                <p>{data?.overall.suspicionType.replaceAll("-", " ")}</p>
-              </div>
-            )}
-            <div
-              className={`flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full ${
-                Number(data?.overall?.score) > 0.7
-                  ? "bg-red-500/30"
-                  : "bg-blue-500/30"
-              }`}
-            >
-              <p>Document</p>
+    <div className="flex flex-col gap-4 h-full overflow-hidden">
+      <ScrollArea className="h-full pb-17">
+        <div className="flex flex-col gap-2 overflow-y-auto">
+          <div className="flex flex-row items-end justify-between">
+            <p className="text-2xl">Note</p>
+            <div className="flex flex-row items-center gap-2">
+              {data?.suspicionType.toLowerCase() !== "none" && (
+                <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full capitalize bg-red-500/30">
+                  <p>{data?.suspicionType.replaceAll("-", " ")}</p>
+                </div>
+              )}
+              {data?.overall.suspicionType.toLowerCase() !== "none" && (
+                <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full capitalize bg-red-500/30">
+                  <p>
+                    {data?.overall.suspicionType.replaceAll("-", " ")} Issue
+                  </p>
+                </div>
+              )}
+              {Math.round(Number(data?.overall?.score ?? 0) * 100) !== 0 && (
+                <div
+                  className={`flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full ${
+                    Number(data?.overall?.score) > 0.7
+                      ? "bg-red-500/30"
+                      : "bg-blue-500/30"
+                  }`}
+                >
+                  <p>
+                    {Math.round(Number(data?.overall?.score ?? 0) * 100)}% Risk
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-        <p className="text-2xl p-4 bg-primary/30 rounded-md">
-          {data?.overall.verdict}
-        </p>
-      </div>
-      <div className="flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="relative">
-            <ReactCompareSlider
-              key={data?.id}
-              className="w-full bg-white rounded-md"
-              itemOne={
-                <ReactCompareSliderImage
-                  src={data?.verification.previewLiveNormalizedImageUrl}
-                  alt="Query Normalized Signature"
-                  style={{
-                    objectFit: "contain",
-                    width: "100%",
-                    height: "100%",
-                    padding: "2rem",
-                  }}
-                />
-              }
-              itemTwo={
-                <ReactCompareSliderImage
-                  src={data?.verification.previewRefNormalizedImageUrl}
-                  alt="Original Normalized Signature"
-                  style={{
-                    objectFit: "contain",
-                    width: "100%",
-                    height: "100%",
-                    padding: "2rem",
-                  }}
-                />
-              }
-              style={{ width: "100%", height: "100%" }}
-            />
-            <div className="absolute bottom-4 left-4">
-              <p className="text-2xl text-primary-foreground">Comparison</p>
-            </div>
-          </div>
-          <div className="relative">
-            <img
-              src={data?.verification.previewImageUrl}
-              alt={`${data?.verification.id}-heatmap`}
-              className="h-full w-full object-contain rounded-md"
-            />
-            <div className="absolute bottom-4 left-4">
-              <p className="text-2xl text-primary-foreground">Heatmap</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center justify-between">
-            <p className="text-2xl">Document Analysis</p>
           </div>
           <p className="text-2xl p-4 bg-primary/30 rounded-md">
-            {data?.overview}
+            {data?.overall.verdict}
           </p>
         </div>
-      </div>
+        <div className="flex flex-col gap-2 mt-4">
+          <div className="flex flex-row items-end gap-4 justify-between">
+            <p className="text-2xl">Signature Analysis</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <ReactCompareSlider
+                key={data?.id}
+                className="w-full bg-white rounded-md"
+                itemOne={
+                  <ReactCompareSliderImage
+                    src={data?.verification.previewLiveNormalizedImageUrl}
+                    alt="Query Normalized Signature"
+                    style={{
+                      objectFit: "contain",
+                      width: "100%",
+                      height: "100%",
+                      padding: "2rem",
+                    }}
+                  />
+                }
+                itemTwo={
+                  <ReactCompareSliderImage
+                    src={data?.verification.previewRefNormalizedImageUrl}
+                    alt="Original Normalized Signature"
+                    style={{
+                      objectFit: "contain",
+                      width: "100%",
+                      height: "100%",
+                      padding: "2rem",
+                    }}
+                  />
+                }
+                style={{ width: "100%", height: "100%" }}
+              />
+              <div className="absolute bottom-4 left-4">
+                <p className="text-2xl text-primary-foreground">Comparison</p>
+              </div>
+            </div>
+            <div className="relative">
+              <img
+                src={data?.verification.previewImageUrl}
+                alt={`${data?.verification.id}-heatmap`}
+                className="h-full w-full object-contain rounded-md"
+              />
+              <div className="absolute bottom-4 left-4">
+                <p className="text-2xl text-primary-foreground">Heatmap</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-row items-end gap-4 justify-between">
+              <p className="text-2xl">Document Analysis</p>
+            </div>
+
+            <p className="text-2xl p-4 bg-primary/30 rounded-md">
+              {data?.overview}
+            </p>
+          </div>
+        </div>
+      </ScrollArea>
     </div>
   );
 }
@@ -500,6 +521,8 @@ export default function Evaluation({
   const handleEvaluationTab = (
     tab: "signature-evaluation" | "document-evaluation" | "overall-evaluation",
   ) => setEvaluationType(tab);
+
+  const [department] = useQueryState("department");
 
   if (data?.status === "processing") {
     return (
@@ -555,15 +578,22 @@ export default function Evaluation({
             )}
             {evaluationType === "overall-evaluation" && (
               <>
-                <VerificationBadge
-                  status={data?.finalRank as DocumentFinalRankType}
+                <OverallVerificationBadge
+                  status={data?.overall.finalRank as DocumentFinalRankType}
                 />
                 <p className="text-2xl tracking-tight">
-                  {data?.finalRank.toLowerCase() === "low"
-                    ? "Low Risk"
-                    : data?.finalRank === "moderate"
-                      ? "Moderate Risk"
-                      : "Highly Suspicious"}
+                  {(() => {
+                    const rank = data?.overall?.finalRank?.toLowerCase();
+                    if (rank === "low") return "Low Risk";
+                    if (rank === "moderate") return "Moderate Risk";
+                    if (
+                      rank === "highly suspicious" ||
+                      rank === "high" ||
+                      rank === "highly-suspicious"
+                    )
+                      return "Highly Suspicious";
+                    return "Unknown Rank";
+                  })()}
                 </p>
               </>
             )}
@@ -593,13 +623,15 @@ export default function Evaluation({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            size="icon-lg"
-            onClick={() => setMode(null)}
-          >
-            <X />
-          </Button>
+          {!department && (
+            <Button
+              variant="outline"
+              size="icon-lg"
+              onClick={() => setMode(null)}
+            >
+              <X />
+            </Button>
+          )}
         </div>
       </div>
       <Separator />

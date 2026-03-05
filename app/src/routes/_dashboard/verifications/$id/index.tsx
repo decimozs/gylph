@@ -170,7 +170,7 @@ function RouteComponent() {
               <span className="text-primary">(VRF - {verification.no})</span>
             </p>
             <div className="flex flex-row items-center gap-2">
-              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full">
+              <div className="flex flex-row items-center gap-2 border border-dashed h-10 px-4 rounded-full bg-blue-500/30">
                 <p>
                   {Math.round(Number(verification.similarityScore) * 100)} %
                 </p>

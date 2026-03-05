@@ -7,6 +7,8 @@ import QueryProvider from "./components/provider/query-provider";
 import { ThemeProvider } from "./components/provider/theme-provider";
 import { QueryClient } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/react";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { Toaster } from "./components/ui/sonner";
 
 export const queryClient = new QueryClient();
 
@@ -31,7 +33,10 @@ if (!rootElement.innerHTML) {
       <QueryProvider>
         <NuqsAdapter>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <RouterProvider router={router} />
+            <TooltipProvider>
+              <Toaster />
+              <RouterProvider router={router} />
+            </TooltipProvider>
           </ThemeProvider>
         </NuqsAdapter>
       </QueryProvider>

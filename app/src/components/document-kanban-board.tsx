@@ -16,14 +16,14 @@ export default function DocumentKanbanBoard({
 }: {
   data: (Document & { verification: Verification; overall: OverallScore })[];
 }) {
-  const authenticSignatures = data.filter(
-    (i) => i.verification.status === "authentic",
+  const verifiedDocuments = data.filter(
+    (i) => i.overall?.finalRank === "low",
   ).length;
-  const needReviewSignatures = data.filter(
-    (i) => i.verification.status === "needs-review",
+  const needReviewDocuments = data.filter(
+    (i) => i.overall?.finalRank === "moderate",
   ).length;
-  const forgedSignatures = data.filter(
-    (i) => i.verification.status === "forged",
+  const fraudDocuments = data.filter(
+    (i) => i.overall?.finalRank === "high",
   ).length;
 
   return (
@@ -34,13 +34,13 @@ export default function DocumentKanbanBoard({
             <BadgeCheck className="text-white" />
           </div>
           <p className="text-2xl tracking-tight">
-            {authenticSignatures} Verified
+            {verifiedDocuments} Verified
           </p>
         </div>
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.verification.status === "authentic",
+            (i) => i.overall?.finalRank === "low",
           );
 
           if (filteredData.length > 0) {
@@ -122,13 +122,13 @@ export default function DocumentKanbanBoard({
             <BadgeHelp className="text-white" />
           </div>
           <p className="text-2xl tracking-tight">
-            {needReviewSignatures} In Review
+            {needReviewDocuments} In Review
           </p>
         </div>
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.verification.status === "needs-review",
+            (i) => i.overall?.finalRank === "moderate",
           );
 
           if (filteredData.length > 0) {
@@ -209,14 +209,12 @@ export default function DocumentKanbanBoard({
           <div className="p-1 rounded-full bg-red-500">
             <BadgeAlert className="text-white" />
           </div>
-          <p className="text-2xl tracking-tight">
-            {forgedSignatures} Anomalies
-          </p>
+          <p className="text-2xl tracking-tight">{fraudDocuments} Anomalies</p>
         </div>
         <Separator />
         {(() => {
           const filteredData = data.filter(
-            (item) => item.verification.status === "forged",
+            (i) => i.overall?.finalRank === "high",
           );
 
           if (filteredData.length > 0) {
