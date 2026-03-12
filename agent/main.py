@@ -23,14 +23,14 @@ if not HF_TOKEN or not HF_BASE_URL:
 
 medical_llm = ChatOpenAI(
     model=MEDICAL_MODEL,
-    api_key="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",
+    api_key=HF_TOKEN,
     base_url=HF_BASE_URL,
     streaming=True,
 )
 
 deepseek_llm = ChatOpenAI(
     model=DEEPSEEK_MODEL,
-    api_key="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",
+    api_key=HF_TOKEN,
     base_url=HF_BASE_URL,
     streaming=True,
 )
